@@ -1,19 +1,14 @@
 #include <gtk/gtk.h>
 
-// Tiêu đề của cửa sổ
+// Cấu hình cửa sổ
 const char *WINDOW_TITLE = "Quản lí tiệm sửa xe";
-
-// Chiều rộng của cửa sổ
-const int WINDOW_WIDTH = 1366;
-
-// Chiều cao của cửa sổ
-const int WINDOW_HEIGHT = 768;
+const int WINDOW_WIDTH = 1200;
+const int WINDOW_HEIGHT = 800;
 
 /**
- * @author Jacky
- * @details Tạo button
- * @param parent Cha
- * @param label Nội dung của button
+ * Tạo nút bấm với khoảng cách chuẩn
+ * @param parent Widget cha
+ * @param label Nội dung nút
  * @return GtkWidget
  */
 static GtkWidget *createButton(GtkWidget *parent, const char *label)
@@ -30,13 +25,11 @@ static GtkWidget *createButton(GtkWidget *parent, const char *label)
 }
 
 /**
- *
- * @author Jacky
- * @details Tạo trang mới cho notebook
- * @param notebook Notebook
- * @param orientation Hướng của các nội dung trong trang
+ * Tạo trang mới trong notebook
+ * @param notebook Widget notebook
+ * @param orientation Hướng nội dung
  * @param spacing Khoảng cách giữa các phần tử
- * @param title Tiêu đề của trang
+ * @param title Tiêu đề trang
  * @return GtkWidget
  */
 static GtkWidget *
@@ -56,9 +49,8 @@ createPage(GtkNotebook *notebook, GtkOrientation orientation, int spacing, const
 }
 
 /**
- * @author Jacky
- * @details Tạo menu box
- * @param parent Cha
+ * Tạo khung menu dọc với khoảng cách chuẩn
+ * @param parent Widget cha
  * @return GtkWidget
  */
 static GtkWidget *createMenuBox(GtkWidget *parent)
@@ -74,21 +66,80 @@ static GtkWidget *createMenuBox(GtkWidget *parent)
     return menuBox;
 }
 
+/**
+ * Tạo danh sách có thể mở rộng
+ * @param parent Widget cha
+ * @return GtkWidget
+ */
 static GtkWidget *createList(GtkWidget *parent)
 {
     GtkWidget *listView;
     listView = gtk_tree_view_new();
+    gtk_widget_set_hexpand(listView, TRUE); // Cho phép mở rộng theo chiều ngang
+    gtk_widget_set_vexpand(listView, TRUE); // Cho phép mở rộng theo chiều dọc
     gtk_container_add(GTK_CONTAINER(parent), listView);
     gtk_widget_show(listView);
     return listView;
 }
 
 /**
- *
- * @author Jacky
- * @details Tạo notebook
- * @param window Cửa sổ
- * @return void
+ * Tạo trường nhập liệu
+ * @param parent Widget cha
+ * @return GtkWidget
+ */
+static GtkWidget *createInput(GtkWidget *parent)
+{
+    GtkWidget *input;
+    input = gtk_entry_new();
+    gtk_container_add(GTK_CONTAINER(parent), input);
+    gtk_widget_show(input);
+    return input;
+}
+
+/**
+ * Tạo cột trong tree view
+ * @param parent Widget cha
+ * @param title Tiêu đề cột
+ * @return GtkTreeViewColumn
+ */
+static GtkTreeViewColumn *createViewColumn(GtkWidget *parent, const char *title)
+{
+    GtkTreeViewColumn *viewColumn;
+    GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
+    viewColumn = gtk_tree_view_column_new_with_attributes(title, renderer, "text", 0, NULL);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(parent), viewColumn);
+    return viewColumn;
+}
+
+/**
+ * Tạo kho dữ liệu danh sách với 5 cột kiểu chuỗi
+ * @return GtkListStore
+ */
+static GtkListStore *createListStore()
+{
+    GtkListStore *store = gtk_list_store_new(5, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
+    return store;
+}
+
+/**
+ * Thêm bản ghi khách hàng vào kho dữ liệu
+ * @param store Kho dữ liệu
+ * @param customerId Mã khách hàng
+ * @param fullName Họ tên
+ * @param phoneNumber Số điện thoại
+ * @param carPlate Biển số xe
+ * @param carType Loại xe
+ */
+static void addData(GtkListStore *store, const char *customerId, const char *fullName, const char *phoneNumber, const char *carPlate, const char *carType)
+{
+    GtkTreeIter iter;
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, customerId, 1, fullName, 2, phoneNumber, 3, carPlate, 4, carType, -1);
+}
+
+/**
+ * Tạo notebook chính với tất cả các trang
+ * @param window Cửa sổ chính
  */
 static void createNotebook(GtkWidget *window)
 {
@@ -96,8 +147,10 @@ static void createNotebook(GtkWidget *window)
     GtkWidget *pageKhachHang, *pageDichVu, *pageThanhToan, *pageThongKe;
     GtkWidget *labelKhachHang, *labelDichVu, *labelThanhToan, *labelThongKe;
 
-    // Create notebook
+    // Tạo notebook
     notebook = gtk_notebook_new();
+    gtk_widget_set_hexpand(notebook, TRUE); // Cho phép notebook mở rộng theo chiều ngang
+    gtk_widget_set_vexpand(notebook, TRUE); // Cho phép notebook mở rộng theo chiều dọc
     gtk_container_add(GTK_CONTAINER(window), notebook);
     gtk_widget_show(notebook);
 
@@ -107,36 +160,53 @@ static void createNotebook(GtkWidget *window)
     pageThanhToan = createPage(GTK_NOTEBOOK(notebook), GTK_ORIENTATION_HORIZONTAL, 5, "Thanh toán");
     pageThongKe = createPage(GTK_NOTEBOOK(notebook), GTK_ORIENTATION_HORIZONTAL, 5, "Thống kê");
 
-    // [[ Page Khách hàng ]]
+    // [[ Trang Khách hàng ]]
     GtkWidget *menuBox = createMenuBox(pageKhachHang);
+    gtk_widget_set_halign(menuBox, GTK_ALIGN_START); // Căn menu box về bên trái
+    gtk_widget_set_valign(menuBox, GTK_ALIGN_FILL);  // Cho phép menu box mở rộng theo chiều dọc
+
     GtkWidget *buttonThemKhachHang = createButton(menuBox, "Thêm khách hàng");
     GtkWidget *buttonSuaKhachHang = createButton(menuBox, "Sửa khách hàng");
     GtkWidget *buttonXoaKhachHang = createButton(menuBox, "Xóa khách hàng");
 
     GtkWidget *listView = createList(pageKhachHang);
-    // [[ Page Dịch vụ ]]
+    gtk_widget_set_hexpand(listView, TRUE); // Cho phép list view mở rộng theo chiều ngang
+    gtk_widget_set_vexpand(listView, TRUE); // Cho phép list view mở rộng theo chiều dọc
+
+    GtkListStore *store = createListStore();
+
+    // Tạo model dữ liệu cho danh sách khách hàng
+    gtk_tree_view_set_model(GTK_TREE_VIEW(listView), GTK_TREE_MODEL(store));
+
+    // Tạo cột hiển thị
+    GtkTreeViewColumn *customerIdColumn = createViewColumn(listView, "Mã KH");
+    GtkTreeViewColumn *fullNameColumn = createViewColumn(listView, "Họ tên");
+    GtkTreeViewColumn *phoneNumberColumn = createViewColumn(listView, "Số điện thoại");
+    GtkTreeViewColumn *carPlateColumn = createViewColumn(listView, "Biển số xe");
+    GtkTreeViewColumn *carTypeColumn = createViewColumn(listView, "Loại xe");
+
+    // Thêm dữ liệu mẫu
+    // addData(store, "KH001", "Nguyễn Văn A", "0909090909", "1234567890", "Toyota");
+    // addData(store, "KH002", "Nguyễn Văn B", "0909090909", "1234567890", "Toyota");
+    // addData(store, "KH003", "Nguyễn Văn C", "0909090909", "1234567890", "Toyota");
+
+    g_object_unref(store);
+    // [[ Trang Dịch vụ ]]
 }
 
 /**
- *
- * @author Jacky
- * @details Tạo giao diện
- * @param window Cửa sổ
- * @return void
+ * Khởi tạo các thành phần giao diện chính
+ * @param window Cửa sổ chính
  */
 static void createUI(GtkWidget *window)
 {
-    // Toàn bộ các component sẽ được khởi tạo ở đây
     createNotebook(window);
 }
 
 /**
- *
- * @author Jacky
- * @details Kích hoạt ứng dụng
- * @param app Ứng dụng
+ * Hàm xử lý khi ứng dụng được kích hoạt
+ * @param app Thể hiện ứng dụng
  * @param user_data Dữ liệu người dùng
- * @return void
  */
 static void activate(GtkApplication *app, gpointer user_data)
 {
@@ -153,12 +223,10 @@ static void activate(GtkApplication *app, gpointer user_data)
 }
 
 /**
- *
- * @author Jacky
- * @details Chính
+ * Điểm vào chính của ứng dụng
  * @param argc Số lượng tham số
- * @param argv Tham số
- * @return int
+ * @param argv Mảng tham số
+ * @return Trạng thái ứng dụng
  */
 int main(int argc, char *argv[])
 {
