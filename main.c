@@ -87,10 +87,10 @@ static GtkWidget *createList(GtkWidget *parent)
  * @param parent Widget cha
  * @return GtkWidget
  */
-static GtkWidget *createInput(GtkWidget *parent)
+static GtkWidget *createSearch(GtkWidget *parent)
 {
     GtkWidget *input;
-    input = gtk_entry_new();
+    input = gtk_search_entry_new();
     gtk_container_add(GTK_CONTAINER(parent), input);
     gtk_widget_show(input);
     return input;
@@ -100,24 +100,75 @@ static GtkWidget *createInput(GtkWidget *parent)
  * Tạo cột trong tree view
  * @param parent Widget cha
  * @param title Tiêu đề cột
+ * @param column_index Chỉ số cột trong model
  * @return GtkTreeViewColumn
  */
-static GtkTreeViewColumn *createViewColumn(GtkWidget *parent, const char *title)
+static GtkTreeViewColumn *createViewColumn(GtkWidget *parent, const char *title, int column_index)
 {
     GtkTreeViewColumn *viewColumn;
     GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
-    viewColumn = gtk_tree_view_column_new_with_attributes(title, renderer, "text", 0, NULL);
+    viewColumn = gtk_tree_view_column_new_with_attributes(title, renderer, "text", column_index, NULL);
     gtk_tree_view_append_column(GTK_TREE_VIEW(parent), viewColumn);
     return viewColumn;
 }
 
 /**
- * Tạo kho dữ liệu danh sách với 5 cột kiểu chuỗi
+ * Xử lý tìm kiếm trong danh sách khách hàng
+ * @param entry Thanh tìm kiếm
+ * @param user_data Dữ liệu người dùng (GtkListStore)
+ */
+static void on_search(GtkEntry *entry, gpointer user_data)
+{
+    GtkListStore *store = GTK_LIST_STORE(user_data);              // Kho dữ liệu
+    GtkTreeModel *model = GTK_TREE_MODEL(store);                  // Model dữ liệu
+    GtkTreeIter iter;                                             // Iterator
+    const char *search_text = gtk_entry_get_text(entry);          // Lấy text tìm kiếm
+    gboolean valid = gtk_tree_model_get_iter_first(model, &iter); // Lấy iterator đầu tiên
+
+    // Nếu không có text tìm kiếm, hiển thị tất cả
+    if (strlen(search_text) == 0)
+    {
+        while (valid)
+        {
+            gtk_list_store_set(store, &iter, 5, TRUE, -1); // 5 là cột ẩn chứa trạng thái hiển thị
+            valid = gtk_tree_model_iter_next(model, &iter);
+        }
+        return;
+    }
+
+    // Tìm kiếm theo biển số xe
+    while (valid)
+    {
+        char *carPlate;
+        gtk_tree_model_get(model, &iter, 3, &carPlate, -1); // 3 là cột biển số xe
+
+        // Kiểm tra xem text tìm kiếm có xuất hiện trong biển số xe không
+        gboolean found = (strstr(carPlate, search_text) != NULL);
+
+        // Cập nhật trạng thái hiển thị
+        gtk_list_store_set(store, &iter, 5, found, -1);
+
+        // Giải phóng bộ nhớ
+        g_free(carPlate);
+
+        valid = gtk_tree_model_iter_next(model, &iter);
+    }
+}
+
+/**
+ * Tạo kho dữ liệu danh sách với 5 cột kiểu chuỗi và 1 cột boolean
  * @return GtkListStore
  */
 static GtkListStore *createListStore()
 {
-    GtkListStore *store = gtk_list_store_new(5, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
+    GtkListStore *store = gtk_list_store_new(6,
+                                             G_TYPE_STRING, // Mã KH
+                                             G_TYPE_STRING, // Họ tên
+                                             G_TYPE_STRING, // Số điện thoại
+                                             G_TYPE_STRING, // Biển số xe
+                                             G_TYPE_STRING, // Loại xe
+                                             G_TYPE_BOOLEAN // Trạng thái hiển thị
+    );
     return store;
 }
 
@@ -134,7 +185,14 @@ static void addData(GtkListStore *store, const char *customerId, const char *ful
 {
     GtkTreeIter iter;
     gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, customerId, 1, fullName, 2, phoneNumber, 3, carPlate, 4, carType, -1);
+    gtk_list_store_set(store, &iter,
+                       0, customerId,
+                       1, fullName,
+                       2, phoneNumber,
+                       3, carPlate,
+                       4, carType,
+                       5, TRUE, // Set trạng thái hiển thị mặc định là TRUE
+                       -1);
 }
 
 /**
@@ -161,36 +219,53 @@ static void createNotebook(GtkWidget *window)
     pageThongKe = createPage(GTK_NOTEBOOK(notebook), GTK_ORIENTATION_HORIZONTAL, 5, "Thống kê");
 
     // [[ Trang Khách hàng ]]
-    GtkWidget *menuBox = createMenuBox(pageKhachHang);
-    gtk_widget_set_halign(menuBox, GTK_ALIGN_START); // Căn menu box về bên trái
-    gtk_widget_set_valign(menuBox, GTK_ALIGN_FILL);  // Cho phép menu box mở rộng theo chiều dọc
+    GtkWidget *menuBoxForPageKhachHang = createMenuBox(pageKhachHang);
+    gtk_widget_set_halign(menuBoxForPageKhachHang, GTK_ALIGN_START); // Căn menu box về bên trái
+    gtk_widget_set_valign(menuBoxForPageKhachHang, GTK_ALIGN_FILL);  // Cho phép menu box mở rộng theo chiều dọc
 
-    GtkWidget *buttonThemKhachHang = createButton(menuBox, "Thêm khách hàng");
-    GtkWidget *buttonSuaKhachHang = createButton(menuBox, "Sửa khách hàng");
-    GtkWidget *buttonXoaKhachHang = createButton(menuBox, "Xóa khách hàng");
+    GtkWidget *listViewForPageKhachHang = createList(pageKhachHang);
+    gtk_widget_set_hexpand(listViewForPageKhachHang, TRUE); // Cho phép list view mở rộng theo chiều ngang
+    gtk_widget_set_vexpand(listViewForPageKhachHang, TRUE); // Cho phép list view mở rộng theo chiều dọc
 
-    GtkWidget *listView = createList(pageKhachHang);
-    gtk_widget_set_hexpand(listView, TRUE); // Cho phép list view mở rộng theo chiều ngang
-    gtk_widget_set_vexpand(listView, TRUE); // Cho phép list view mở rộng theo chiều dọc
-
-    GtkListStore *store = createListStore();
+    GtkListStore *customerList = createListStore(); // Tạo kho dữ liệu
 
     // Tạo model dữ liệu cho danh sách khách hàng
-    gtk_tree_view_set_model(GTK_TREE_VIEW(listView), GTK_TREE_MODEL(store));
+    GtkTreeModel *filter_model = gtk_tree_model_filter_new(GTK_TREE_MODEL(customerList), NULL); // Tạo model filter
+    gtk_tree_model_filter_set_visible_column(GTK_TREE_MODEL_FILTER(filter_model), 5);           // Set cột ẩn chứa trạng thái hiển thị
+    gtk_tree_view_set_model(GTK_TREE_VIEW(listViewForPageKhachHang), filter_model);             // Set model cho list view
 
     // Tạo cột hiển thị
-    GtkTreeViewColumn *customerIdColumn = createViewColumn(listView, "Mã KH");
-    GtkTreeViewColumn *fullNameColumn = createViewColumn(listView, "Họ tên");
-    GtkTreeViewColumn *phoneNumberColumn = createViewColumn(listView, "Số điện thoại");
-    GtkTreeViewColumn *carPlateColumn = createViewColumn(listView, "Biển số xe");
-    GtkTreeViewColumn *carTypeColumn = createViewColumn(listView, "Loại xe");
+    GtkTreeViewColumn *customerIdColumn = createViewColumn(listViewForPageKhachHang, "Mã KH", 0);
+    GtkTreeViewColumn *fullNameColumn = createViewColumn(listViewForPageKhachHang, "Họ tên", 1);
+    GtkTreeViewColumn *phoneNumberColumn = createViewColumn(listViewForPageKhachHang, "Số điện thoại", 2);
+    GtkTreeViewColumn *carPlateColumn = createViewColumn(listViewForPageKhachHang, "Biển số xe", 3);
+    GtkTreeViewColumn *carTypeColumn = createViewColumn(listViewForPageKhachHang, "Loại xe", 4);
+
+    // Tạo thanh tìm kiếm
+    GtkWidget *searchBoxForPageKhachHang = createMenuBox(menuBoxForPageKhachHang);
+    GtkWidget *searchBarForPageKhachHang = createSearch(searchBoxForPageKhachHang);
+    gtk_entry_set_placeholder_text(GTK_ENTRY(searchBarForPageKhachHang), "Tìm kiếm theo biển số xe");
+    gtk_widget_set_size_request(searchBarForPageKhachHang, 300, -1);
+
+    // Tạo những nút cần thiết
+    GtkWidget *buttonThemKhachHang = createButton(menuBoxForPageKhachHang, "Thêm khách hàng");
+    GtkWidget *buttonSuaKhachHang = createButton(menuBoxForPageKhachHang, "Sửa khách hàng");
+    GtkWidget *buttonXoaKhachHang = createButton(menuBoxForPageKhachHang, "Xóa khách hàng");
 
     // Thêm dữ liệu mẫu
-    // addData(store, "KH001", "Nguyễn Văn A", "0909090909", "1234567890", "Toyota");
-    // addData(store, "KH002", "Nguyễn Văn B", "0909090909", "1234567890", "Toyota");
-    // addData(store, "KH003", "Nguyễn Văn C", "0909090909", "1234567890", "Toyota");
+    addData(customerList, "KH001", "Nguyễn Văn A", "0909090909", "51G-12345", "Toyota");
+    addData(customerList, "KH002", "Nguyễn Văn B", "0909090909", "51G-67890", "Honda");
+    addData(customerList, "KH003", "Nguyễn Văn C", "0909090909", "51G-11111", "Yamaha");
 
-    g_object_unref(store);
+    // Kết nối sự kiện tìm kiếm
+    g_signal_connect(searchBarForPageKhachHang, "changed", G_CALLBACK(on_search), customerList);
+
+    // Cập nhật filter model
+    gtk_tree_model_filter_refilter(GTK_TREE_MODEL_FILTER(filter_model));
+
+    g_object_unref(customerList);
+    g_object_unref(filter_model);
+
     // [[ Trang Dịch vụ ]]
 }
 
