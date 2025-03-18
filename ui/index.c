@@ -1,7 +1,9 @@
 #include <gtk/gtk.h>
 #include "index.h"
 #include "components.c"
+#include "pages/index.c"
 #include "pages/customer.c"
+#include "pages/service.c"
 
 /**
  * Tạo giao diện chính
@@ -11,6 +13,7 @@ void createUI(GtkWidget *window)
 {
     GtkWidget *notebook = createNotebook(window);
     createCustomerPage(notebook);
+    createServicePage(notebook);
 }
 
 /**

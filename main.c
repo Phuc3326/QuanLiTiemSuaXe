@@ -7,49 +7,6 @@ const int WINDOW_WIDTH = 1200;
 const int WINDOW_HEIGHT = 800;
 
 /**
- * Xử lý tìm kiếm trong danh sách khách hàng
- * @param entry Thanh tìm kiếm
- * @param user_data Dữ liệu người dùng (GtkListStore)
- */
-static void on_search(GtkEntry *entry, gpointer user_data)
-{
-    GtkListStore *store = GTK_LIST_STORE(user_data);              // Kho dữ liệu
-    GtkTreeModel *model = GTK_TREE_MODEL(store);                  // Model dữ liệu
-    GtkTreeIter iter;                                             // Iterator
-    const char *search_text = gtk_entry_get_text(entry);          // Lấy text tìm kiếm
-    gboolean valid = gtk_tree_model_get_iter_first(model, &iter); // Lấy iterator đầu tiên
-
-    // Nếu không có text tìm kiếm, hiển thị tất cả
-    if (strlen(search_text) == 0)
-    {
-        while (valid)
-        {
-            gtk_list_store_set(store, &iter, 5, TRUE, -1); // 5 là cột ẩn chứa trạng thái hiển thị
-            valid = gtk_tree_model_iter_next(model, &iter);
-        }
-        return;
-    }
-
-    // Tìm kiếm theo biển số xe
-    while (valid)
-    {
-        char *carPlate;
-        gtk_tree_model_get(model, &iter, 3, &carPlate, -1); // 3 là cột biển số xe
-
-        // Kiểm tra xem text tìm kiếm có xuất hiện trong biển số xe không
-        gboolean found = (strstr(carPlate, search_text) != NULL);
-
-        // Cập nhật trạng thái hiển thị
-        gtk_list_store_set(store, &iter, 5, found, -1);
-
-        // Giải phóng bộ nhớ
-        g_free(carPlate);
-
-        valid = gtk_tree_model_iter_next(model, &iter);
-    }
-}
-
-/**
  * Tạo notebook chính với tất cả các trang
  * @param window Cửa sổ chính
  */
