@@ -1,9 +1,10 @@
 #include <gtk/gtk.h>
-#include "index.h"
-#include "components.c"
-#include "pages/index.c"
-#include "pages/customer.c"
-#include "pages/service.c"
+#include "ui.h"
+// #include "components.c"
+// #include "pages/index.h"
+#include "components/notebook.h"
+#include "pages/customer.h"
+#include "pages/service.h"
 
 /**
  * Tạo giao diện chính

@@ -3,6 +3,7 @@
 #include "../components/button.h"
 #include "../components/treeView.h"
 #include "../components/search.h"
+#include "../components/page.h"
 #include "../utils/listStore.h"
 
 GtkWidget *createServicePage(GtkWidget *notebook)

@@ -1,5 +1,0 @@
-#include "../components/box.c"
-#include "../components/button.c"
-#include "../components/treeView.c"
-#include "../components/search.c"
-#include "../utils/listStore.c"

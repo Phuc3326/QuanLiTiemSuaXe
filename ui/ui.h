@@ -5,4 +5,5 @@
 
 GtkWidget *createWindow(GtkApplication *app, const char *title, int width, int height);
 void createUI(GtkWidget *window);
+
 #endif

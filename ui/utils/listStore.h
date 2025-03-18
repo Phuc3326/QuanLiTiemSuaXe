@@ -5,5 +5,6 @@
 
 GtkListStore *createListStore(int nColumns, ...);
 void appendIter(GtkListStore *store, GtkTreeIter *iter);
+void addData(GtkListStore *store, GtkTreeIter *iter, ...);
 
 #endif
