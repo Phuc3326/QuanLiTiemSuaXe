@@ -4,17 +4,17 @@ project(GTKTutorial)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 
-set(GTK3_INCLUDE_DIRS "C:/msys64/mingw64/include/")
-set(GTK3_LIBRARY_DIRS "C:/msys64/mingw64/lib")
-set(ENV{PKG_CONFIG_PATH} "C:/msys64/mingw64/lib/pkgconfig")
+# Set MSYS2 paths
+set(MSYS2_PATH "C:/msys64")
+set(ENV{PKG_CONFIG_PATH} "${MSYS2_PATH}/mingw64/lib/pkgconfig")
 
+# Find PkgConfig
 find_package(PkgConfig REQUIRED)
-pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
+pkg_check_modules(GTK3 REQUIRED IMPORTED_TARGET gtk+-3.0)
 
-include_directories(${GTK3_INCLUDE_DIRS})
-link_directories(${GTK3_LIBRARY_DIRS})
-add_definitions(${GTK3_CFLAGS_OTHER})
-
+# Add executable
 add_executable(app main.c)
-set_target_properties(app PROPERTIES WIN32_EXECUTABLE true)  # If you dont want console to run with your .exe
-target_link_libraries(app ${GTK3_LIBRARIES})
+set_target_properties(app PROPERTIES WIN32_EXECUTABLE true)
+
+# Link against GTK3
+target_link_libraries(app PRIVATE PkgConfig::GTK3)
