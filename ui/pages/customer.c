@@ -94,11 +94,8 @@ GtkWidget *createCustomerPage(GtkWidget *notebook)
 
     // Hiển thị danh sách khách hàng
     GtkWidget *listViewForPageKhachHang = createTreeView(page);
-    GtkTreeViewColumn *customerIdColumn = createTreeViewColumn(listViewForPageKhachHang, "Mã KH", 0);
-    GtkTreeViewColumn *fullNameColumn = createTreeViewColumn(listViewForPageKhachHang, "Họ tên", 1);
-    GtkTreeViewColumn *phoneNumberColumn = createTreeViewColumn(listViewForPageKhachHang, "Số điện thoại", 2);
-    GtkTreeViewColumn *carPlateColumn = createTreeViewColumn(listViewForPageKhachHang, "Biển số xe", 3);
-    GtkTreeViewColumn *carTypeColumn = createTreeViewColumn(listViewForPageKhachHang, "Loại xe", 4);
+    const gchar *columnNames[] = {"Mã KH", "Tên KH", "SĐT", "Biển số", "Loại xe", NULL};
+    createColumns(listViewForPageKhachHang, columnNames, 5);
 
     // Khởi tạo model cho danh sách khách hàng
     GtkListStore *customerList = createListStore(5, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);

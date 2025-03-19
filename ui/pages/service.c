@@ -94,9 +94,8 @@ GtkWidget *createServicePage(GtkWidget *notebook)
 
     // Hiển thị danh sách khách hàng
     GtkWidget *listViewForPageDichVu = createTreeView(page);
-    GtkTreeViewColumn *serviceIdColumn = createTreeViewColumn(listViewForPageDichVu, "Mã DV", 0);
-    GtkTreeViewColumn *serviceNameColumn = createTreeViewColumn(listViewForPageDichVu, "Tên dịch vụ", 1);
-    GtkTreeViewColumn *servicePriceColumn = createTreeViewColumn(listViewForPageDichVu, "Giá", 2);
+    const gchar *columnNames[] = {"Mã DV", "Tên dịch vụ", "Giá"};
+    createColumns(listViewForPageDichVu, columnNames, 3);
 
     // Khởi tạo model cho danh sách khách hàng
     GtkListStore *serviceList = createListStore(3, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);

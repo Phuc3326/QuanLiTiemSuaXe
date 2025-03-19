@@ -32,3 +32,17 @@ GtkWidget *createTreeView(GtkWidget *parent)
     gtk_widget_show(treeView);
     return treeView;
 }
+
+/**
+ * Tạo cột trong tree view
+ * @param treeView Tree view
+ * @param columnNames Mảng tên cột
+ * @param columns Số lượng cột
+ */
+void createColumns(GtkWidget *parent, const gchar *columnNames[], gint columns)
+{
+    for (gint i = 0; i < columns; i++)
+    {
+        createTreeViewColumn(parent, columnNames[i], i);
+    }
+}
