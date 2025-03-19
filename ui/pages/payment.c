@@ -94,10 +94,8 @@ GtkWidget *createPaymentPage(GtkWidget *notebook)
 
     // Hiển thị danh sách khách hàng
     GtkWidget *listViewForPageThanhToan = createTreeView(page);
-    GtkTreeViewColumn *idColumn = createTreeViewColumn(listViewForPageThanhToan, "Mã thanh toán", 0);
-    GtkTreeViewColumn *customerIdColumn = createTreeViewColumn(listViewForPageThanhToan, "Mã KH", 1);
-    GtkTreeViewColumn *paymentDateColumn = createTreeViewColumn(listViewForPageThanhToan, "Ngày thanh toán", 2);
-    GtkTreeViewColumn *paymentAmountColumn = createTreeViewColumn(listViewForPageThanhToan, "Số tiền thanh toán", 3);
+    const gchar *columnNames[] = {"Mã thanh toán", "Mã KH", "Ngày thanh toán", "Số tiền thanh toán", "Mã xe"};
+    createColumns(listViewForPageThanhToan, columnNames, 5);
 
     // Khởi tạo model cho danh sách khách hàng
     GtkListStore *paymentList = createListStore(5, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
