@@ -1,7 +1,0 @@
-{
-	"files.associations": {
-		"*.luau": "lua",
-		"gtk.h": "c",
-		"components.h": "c"
-	}
-}

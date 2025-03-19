@@ -1,10 +1,10 @@
 #include <gtk/gtk.h>
 #include "ui.h"
-// #include "components.c"
-// #include "pages/index.h"
 #include "components/notebook.h"
 #include "pages/customer.h"
 #include "pages/service.h"
+#include "pages/payment.h"
+#include "pages/statistical.h"
 
 /**
  * Tạo giao diện chính
@@ -15,6 +15,8 @@ void createUI(GtkWidget *window)
     GtkWidget *notebook = createNotebook(window);
     createCustomerPage(notebook);
     createServicePage(notebook);
+    createPaymentPage(notebook);
+    createStatisticalPage(notebook);
 }
 
 /**

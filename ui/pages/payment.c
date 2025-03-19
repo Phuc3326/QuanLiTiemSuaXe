@@ -1,4 +1,4 @@
-#include "customer.h"
+#include "payment.h"
 #include "../components/box.h"
 #include "../components/button.h"
 #include "../components/treeView.h"
@@ -73,45 +73,44 @@ static gboolean filter_visible_func(GtkTreeModel *model, GtkTreeIter *iter, gpoi
     return visible;
 }
 
-GtkWidget *createCustomerPage(GtkWidget *notebook)
+/**
+ * Tạo trang thanh toán
+ * @param notebook Notebook chứa trang thanh toán
+ * @return Trang thanh toán
+ */
+GtkWidget *createPaymentPage(GtkWidget *notebook)
 {
     GtkWidget *page;
-    page = createPage(notebook, GTK_ORIENTATION_HORIZONTAL, 10, "Khách hàng");
+    page = createPage(notebook, GTK_ORIENTATION_HORIZONTAL, 10, "Thanh toán");
 
-    GtkWidget *menuBoxForPageKhachHang = createBox(page, GTK_ORIENTATION_VERTICAL, 10);
-    gtk_widget_set_halign(menuBoxForPageKhachHang, GTK_ALIGN_START); // Căn menu box về bên trái
-    gtk_widget_set_valign(menuBoxForPageKhachHang, GTK_ALIGN_FILL);  // Cho phép menu box mở rộng theo chiều dọc
-    gtk_widget_set_size_request(menuBoxForPageKhachHang, 300, -1);
+    GtkWidget *menuBoxForPageThanhToan = createBox(page, GTK_ORIENTATION_VERTICAL, 10);
+    gtk_widget_set_halign(menuBoxForPageThanhToan, GTK_ALIGN_START); // Căn menu box về bên trái
+    gtk_widget_set_valign(menuBoxForPageThanhToan, GTK_ALIGN_FILL);  // Cho phép menu box mở rộng theo chiều dọc
+    gtk_widget_set_size_request(menuBoxForPageThanhToan, 300, -1);
 
-    GtkWidget *searchBoxForPageKhachHang = createBox(menuBoxForPageKhachHang, GTK_ORIENTATION_HORIZONTAL, 10);
-    GtkWidget *searchBarForPageKhachHang = createSearch(searchBoxForPageKhachHang);
-    gtk_entry_set_placeholder_text(GTK_ENTRY(searchBarForPageKhachHang), "Tìm kiếm theo biển số xe");
-    gtk_widget_set_size_request(searchBarForPageKhachHang, 300, -1);
-
-    GtkWidget *buttonThemKhachHang = createButton(menuBoxForPageKhachHang, "Thêm khách hàng");
-    GtkWidget *buttonSuaKhachHang = createButton(menuBoxForPageKhachHang, "Sửa khách hàng");
-    GtkWidget *buttonXoaKhachHang = createButton(menuBoxForPageKhachHang, "Xóa khách hàng");
+    GtkWidget *buttonThemKhachHang = createButton(menuBoxForPageThanhToan, "Thêm khoản thanh toán");
+    GtkWidget *buttonSuaKhachHang = createButton(menuBoxForPageThanhToan, "Sửa kkhoản thanh toán");
+    GtkWidget *buttonXoaKhachHang = createButton(menuBoxForPageThanhToan, "Xóa khoản thanh toán");
 
     // Hiển thị danh sách khách hàng
-    GtkWidget *listViewForPageKhachHang = createTreeView(page);
-    GtkTreeViewColumn *customerIdColumn = createTreeViewColumn(listViewForPageKhachHang, "Mã KH", 0);
-    GtkTreeViewColumn *fullNameColumn = createTreeViewColumn(listViewForPageKhachHang, "Họ tên", 1);
-    GtkTreeViewColumn *phoneNumberColumn = createTreeViewColumn(listViewForPageKhachHang, "Số điện thoại", 2);
-    GtkTreeViewColumn *carPlateColumn = createTreeViewColumn(listViewForPageKhachHang, "Biển số xe", 3);
-    GtkTreeViewColumn *carTypeColumn = createTreeViewColumn(listViewForPageKhachHang, "Loại xe", 4);
+    GtkWidget *listViewForPageThanhToan = createTreeView(page);
+    GtkTreeViewColumn *idColumn = createTreeViewColumn(listViewForPageThanhToan, "Mã thanh toán", 0);
+    GtkTreeViewColumn *customerIdColumn = createTreeViewColumn(listViewForPageThanhToan, "Mã KH", 1);
+    GtkTreeViewColumn *paymentDateColumn = createTreeViewColumn(listViewForPageThanhToan, "Ngày thanh toán", 2);
+    GtkTreeViewColumn *paymentAmountColumn = createTreeViewColumn(listViewForPageThanhToan, "Số tiền thanh toán", 3);
 
     // Khởi tạo model cho danh sách khách hàng
-    GtkListStore *customerList = createListStore(5, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
+    GtkListStore *paymentList = createListStore(5, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
     GtkTreeIter iter;
 
     // Test data
-    addData(customerList, &iter, 0, "KH001", 1, "Nguyễn Văn A", 2, "0123456789", 3, "51G-12345", 4, "Honda Wave", -1);
-    addData(customerList, &iter, 0, "KH001", 1, "Nguyễn Văn A", 2, "0123456789", 3, "52G-1", 4, "test", -1);
+    addData(paymentList, &iter, 0, "KH001", 1, "Nguyễn Văn A", 2, "0123456789", 3, "51G-12345", 4, "Honda Wave", -1);
+    addData(paymentList, &iter, 0, "KH001", 1, "Nguyễn Văn A", 2, "0123456789", 3, "52G-1", 4, "test", -1);
 
-    gtk_tree_view_set_model(GTK_TREE_VIEW(listViewForPageKhachHang), GTK_TREE_MODEL(customerList));
+    gtk_tree_view_set_model(GTK_TREE_VIEW(listViewForPageThanhToan), GTK_TREE_MODEL(paymentList));
 
     // Handle search bar
-    g_signal_connect(searchBarForPageKhachHang, "changed", G_CALLBACK(onSearchChanged), listViewForPageKhachHang);
+    // g_signal_connect(searchBarForPageThanhToan, "changed", G_CALLBACK(onSearchChanged), listViewForPageThanhToan);
 
     return page;
 }
