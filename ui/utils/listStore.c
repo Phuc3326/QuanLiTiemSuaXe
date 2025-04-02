@@ -3,7 +3,7 @@
 /**
  * Tạo list store
  * @param nColumns Số cột
- * @param ...args Các cột
+ * @param ... args Các cột
  * @return GtkListStore
  */
 GtkListStore *createListStore(int nColumns, ...)

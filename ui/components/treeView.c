@@ -7,14 +7,13 @@
  * @param column_index Chỉ số cột trong model
  * @return GtkTreeViewColumn
  */
-GtkTreeViewColumn *createTreeViewColumn(GtkWidget *parent, const char *title, int column_index)
+void createTreeViewColumn(GtkWidget *parent, const char *title, int column_index)
 {
     GtkTreeViewColumn *viewColumn;
     GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
     viewColumn = gtk_tree_view_column_new_with_attributes(title, renderer, "text", column_index, NULL);
     gtk_tree_view_append_column(GTK_TREE_VIEW(parent), viewColumn);
     gtk_tree_view_column_set_visible(viewColumn, TRUE);
-    return viewColumn;
 }
 
 /**
