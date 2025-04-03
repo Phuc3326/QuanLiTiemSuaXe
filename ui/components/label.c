@@ -3,7 +3,7 @@
 /**
  * Tạo label
  * @param parent Widget cha
- * @param char Nội dung label
+ * @param text Nội dung label
  * @return GtkWidget
  */
 GtkWidget *createLabel(GtkWidget *parent, const gchar *text)

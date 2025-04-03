@@ -1,3 +1,5 @@
+// Features for customer page
+
 #include <gtk/gtk.h>
 #include "customers.h"
 #include "components/label.h"
@@ -6,6 +8,7 @@
 #include "components/grid.h"
 #include "components/button.h"
 
+// Feature add infomation of customers
 void addCustomers(GtkWidget *widget, gpointer window_parent) {
     GtkWidget *addCustomers_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_title(GTK_WINDOW(addCustomers_window), "Thêm khách hàng");
