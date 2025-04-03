@@ -20,31 +20,43 @@ static void onSearchChanged(GtkSearchEntry *searchBar, GtkTreeView *listView)
     // Check if the current model is already a filter model
     if (GTK_IS_TREE_MODEL_FILTER(model))
     {
-        // Get the child model
-        model = gtk_tree_model_filter_get_model(GTK_TREE_MODEL_FILTER(model));
+        // Reuse model filter
+        filter_model = GTK_TREE_MODEL_FILTER(model);
+        // Take the original model from filter model
+        model = gtk_tree_model_filter_get_model(filter_model);
+    }
+    else 
+    {
+        // If not model filter -> create a new one
+        filter_model = GTK_TREE_MODEL_FILTER(gtk_tree_model_filter_new(model, NULL));
     }
 
+    // Take text from searchBar
     search_text = gtk_entry_get_text(GTK_ENTRY(searchBar));
 
-    // Create filter model
-    filter_model = GTK_TREE_MODEL_FILTER(gtk_tree_model_filter_new(model, NULL));
+    // Chỉ cấp phát và cập nhật text tìm kiếm lại khi search_text thay đổi
+    const gchar *old_text = g_object_get_data(G_OBJECT(filter_model), "search-text");
+    if (g_strcmp0(old_text, search_text) != 0)
+    {
+        // Store search text as object data to use in filter function
+        g_object_set_data_full(G_OBJECT(filter_model), "search-text",
+                                                g_strdup(search_text), (GDestroyNotify)g_free);
 
-    // Store search text as object data to use in filter function
-    g_object_set_data_full(G_OBJECT(filter_model), "search-text",
-                           g_strdup(search_text), (GDestroyNotify)g_free);
+    }
 
-    // Set visible function
-    gtk_tree_model_filter_set_visible_func(filter_model,
-                                           (GtkTreeModelFilterVisibleFunc)filter_visible_func, filter_model, NULL);
+    // If model filter does not exist
+    if (!GTK_IS_TREE_MODEL_FILTER(gtk_tree_view_get_model(listView)))
+    {
+        // Set visible function
+        gtk_tree_model_filter_set_visible_func(filter_model,
+            (GtkTreeModelFilterVisibleFunc)filter_visible_func, filter_model, NULL);
+
+        // Link filter model with TreeView
+        gtk_tree_view_set_model(listView, GTK_TREE_MODEL(filter_model));
+    }
 
     // Apply the filter
     gtk_tree_model_filter_refilter(filter_model);
-
-    // Set the filtered model to the tree view
-    gtk_tree_view_set_model(listView, GTK_TREE_MODEL(filter_model));
-
-    // Release our reference as the tree view will hold its own
-    g_object_unref(filter_model);
 }
 
 static gboolean filter_visible_func(GtkTreeModel *model, GtkTreeIter *iter, gpointer data)
@@ -55,7 +67,7 @@ static gboolean filter_visible_func(GtkTreeModel *model, GtkTreeIter *iter, gpoi
     gboolean visible = TRUE;
 
     // If search text is empty, show all rows
-    if (search_text == NULL || strlen(search_text) == 0)
+    if (search_text == NULL || search_text[0] == '\0')
     {
         return TRUE;
     }
