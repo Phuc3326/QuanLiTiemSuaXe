@@ -14,8 +14,7 @@ pkg_check_modules(GTK3 REQUIRED IMPORTED_TARGET gtk+-3.0)
 # Add source files dynamically
 file(GLOB_RECURSE SRC_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/*.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/components/*.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/pages/*.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/modules/*.c
     ${CMAKE_CURRENT_SOURCE_DIR}/main.c # Include main.c here
 )
 
@@ -27,9 +26,8 @@ target_link_libraries(app PRIVATE PkgConfig::GTK3)
 
 # Add include directories
 target_include_directories(app PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/modules
     ${CMAKE_CURRENT_SOURCE_DIR}/ui
-    ${CMAKE_CURRENT_SOURCE_DIR}/components
-    ${CMAKE_CURRENT_SOURCE_DIR}/pages
 )
 
 # Ensure the application is linked as a console app

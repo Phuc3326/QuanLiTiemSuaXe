@@ -73,7 +73,7 @@ static gboolean filter_visible_func(GtkTreeModel *model, GtkTreeIter *iter, gpoi
     return visible;
 }
 
-GtkWidget *createServicePage(GtkWidget *notebook)
+GtkWidget *createServicePage(GtkWidget *notebook, GtkWidget *window)
 {
     GtkWidget *page;
     page = createPage(notebook, GTK_ORIENTATION_HORIZONTAL, 10, "Dịch vụ");

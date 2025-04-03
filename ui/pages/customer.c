@@ -5,6 +5,7 @@
 #include "../components/search.h"
 #include "../components/page.h"
 #include "../utils/listStore.h"
+#include "../../modules/customers.h"
 
 static gboolean filter_visible_func(GtkTreeModel *model, GtkTreeIter *iter, gpointer data);
 
@@ -85,7 +86,7 @@ static gboolean filter_visible_func(GtkTreeModel *model, GtkTreeIter *iter, gpoi
     return visible;
 }
 
-GtkWidget *createCustomerPage(GtkWidget *notebook)
+GtkWidget *createCustomerPage(GtkWidget *notebook, GtkWidget *window)
 {
     GtkWidget *page;
     page = createPage(notebook, GTK_ORIENTATION_HORIZONTAL, 10, "Khách hàng");
@@ -121,6 +122,9 @@ GtkWidget *createCustomerPage(GtkWidget *notebook)
 
     // Handle search bar
     g_signal_connect(searchBarForPageKhachHang, "changed", G_CALLBACK(onSearchChanged), listViewForPageKhachHang);
+
+    // Handle "Thêm khách hàng" button
+    g_signal_connect(buttonThemKhachHang, "clicked", G_CALLBACK(addCustomers), window);
 
     return page;
 }

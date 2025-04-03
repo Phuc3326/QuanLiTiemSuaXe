@@ -78,7 +78,7 @@ static gboolean filter_visible_func(GtkTreeModel *model, GtkTreeIter *iter, gpoi
  * @param notebook Notebook chứa trang thanh toán
  * @return Trang thanh toán
  */
-GtkWidget *createPaymentPage(GtkWidget *notebook)
+GtkWidget *createPaymentPage(GtkWidget *notebook, GtkWidget *window)
 {
     GtkWidget *page;
     page = createPage(notebook, GTK_ORIENTATION_HORIZONTAL, 10, "Thanh toán");
