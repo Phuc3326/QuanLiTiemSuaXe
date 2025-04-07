@@ -37,8 +37,8 @@ GtkWidget *createStatisticalPage(GtkWidget *notebook, GtkWidget *window)
     GtkListStore *statsList = createListStore(3, G_TYPE_STRING, G_TYPE_INT, G_TYPE_STRING);
     GtkTreeIter iter;
 
-    addData(statsList, &iter, 0, "01/03/2024", 1, 120, 2, "1,200,000 VND", -1);
-    addData(statsList, &iter, 0, "02/03/2024", 1, 95, 2, "950,000 VND", -1);
+    // addData(statsList, &iter, 0, "01/03/2024", 1, 120, 2, "1,200,000 VND", -1);
+    // addData(statsList, &iter, 0, "02/03/2024", 1, 95, 2, "950,000 VND", -1);
 
     gtk_tree_view_set_model(GTK_TREE_VIEW(statsTreeView), GTK_TREE_MODEL(statsList));
 

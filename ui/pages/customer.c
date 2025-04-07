@@ -5,7 +5,46 @@
 #include "../components/search.h"
 #include "../components/page.h"
 #include "../utils/listStore.h"
+#include "../utils/freeMemory.h"
 #include "../../modules/customers.h"
+
+// Hàm tải nội dung từ file text vào Liststore
+void load_file_to_list_store(GtkListStore *store, const char *filename) {
+    
+    // Mở file
+    FILE *file = fopen(filename, "r");
+    if (!file) {
+        g_print("Không mở được file: %s\n", filename);
+        return;
+    }
+
+    // Tạo mảng line đọc từng hàng của file
+    char line[256];
+
+    // Dùng fgets đọc file đến khi hết dữ liệu thì dừng vòng lặp 
+    while (fgets(line, sizeof(line), file)) {
+        char id[10], name[100], phone[20], plate[20], type[50];
+        
+        // Lưu các chuỗi trong file (với đúng định dạng) vào các mảng đã khai báo
+        // %9[^|]: lưu tối đa 9 ký tự hoặc dừng lại khi gặp |
+        // %49[^\n]: lưu tối đa 49 ký tự hoặc dừng lại khi gặp \n
+        if (sscanf(line, "%9[^|]|%99[^|]|%19[^|]|%19[^|]|%49[^\n]", id, name, phone, plate, type) == 5) {
+            GtkTreeIter iter;
+
+            // Thêm hàng trong Liststore
+            gtk_list_store_append(store, &iter);
+            // Lưu vào Liststore
+            gtk_list_store_set(store, &iter, 
+                              0, id, 
+                              1, name, 
+                              2, phone, 
+                              3, plate,
+                              4, type,
+                              -1);
+        }
+    }
+    fclose(file);
+}
 
 static gboolean filter_visible_func(GtkTreeModel *model, GtkTreeIter *iter, gpointer data);
 
@@ -112,11 +151,9 @@ GtkWidget *createCustomerPage(GtkWidget *notebook, GtkWidget *window)
 
     // Khởi tạo model cho danh sách khách hàng
     GtkListStore *customerList = createListStore(5, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
-    GtkTreeIter iter;
-
-    // Test data
-    addData(customerList, &iter, 0, "KH001", 1, "Nguyễn Văn A", 2, "0123456789", 3, "51G-12345", 4, "Honda Wave", -1);
-    addData(customerList, &iter, 0, "KH001", 1, "Nguyễn Văn A", 2, "0123456789", 3, "52G-1", 4, "test", -1);
+    
+    // Tải dữ liệu file text vào Liststore khi khởi động chương trình
+    load_file_to_list_store(customerList, "../database/customers.txt");
 
     gtk_tree_view_set_model(GTK_TREE_VIEW(listViewForPageKhachHang), GTK_TREE_MODEL(customerList));
 
@@ -124,7 +161,13 @@ GtkWidget *createCustomerPage(GtkWidget *notebook, GtkWidget *window)
     g_signal_connect(searchBarForPageKhachHang, "changed", G_CALLBACK(onSearchChanged), listViewForPageKhachHang);
 
     // Handle "Thêm khách hàng" button
-    g_signal_connect(buttonThemKhachHang, "clicked", G_CALLBACK(addCustomers), window);
+    CustomerData *user_data = g_new(CustomerData, 1);
+    user_data->main_window = window;
+    user_data->store = customerList;
+    g_signal_connect(buttonThemKhachHang, "clicked", G_CALLBACK(addCustomers), user_data);
+
+    // Giải phóng user_data khi dừng chương trình
+    g_signal_connect(window, "destroy", G_CALLBACK(free_memory_when_main_window_destroy), user_data);
 
     return page;
 }

@@ -102,8 +102,8 @@ GtkWidget *createServicePage(GtkWidget *notebook, GtkWidget *window)
     GtkTreeIter iter;
 
     // Test data
-    addData(serviceList, &iter, 0, "001", 1, "Sửa xe", 2, "100000", -1);
-    addData(serviceList, &iter, 0, "002", 1, "Bảo dưỡng", 2, "200000", -1);
+    // addData(serviceList, &iter, 0, "001", 1, "Sửa xe", 2, "100000", -1);
+    // addData(serviceList, &iter, 0, "002", 1, "Bảo dưỡng", 2, "200000", -1);
     gtk_tree_view_set_model(GTK_TREE_VIEW(listViewForPageDichVu), GTK_TREE_MODEL(serviceList));
 
     // Handle search bar
