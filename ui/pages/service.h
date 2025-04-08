@@ -3,6 +3,6 @@
 
 #include <gtk/gtk.h>
 
-GtkWidget *createServicePage(GtkWidget *notebook);
+GtkWidget *createServicePage(GtkWidget *notebook, GtkWidget *window);
 
 #endif

@@ -78,7 +78,7 @@ static gboolean filter_visible_func(GtkTreeModel *model, GtkTreeIter *iter, gpoi
  * @param notebook Notebook chứa trang thanh toán
  * @return Trang thanh toán
  */
-GtkWidget *createPaymentPage(GtkWidget *notebook)
+GtkWidget *createPaymentPage(GtkWidget *notebook, GtkWidget *window)
 {
     GtkWidget *page;
     page = createPage(notebook, GTK_ORIENTATION_HORIZONTAL, 10, "Thanh toán");
@@ -102,8 +102,8 @@ GtkWidget *createPaymentPage(GtkWidget *notebook)
     GtkTreeIter iter;
 
     // Test data
-    addData(paymentList, &iter, 0, "KH001", 1, "Nguyễn Văn A", 2, "0123456789", 3, "51G-12345", 4, "Honda Wave", -1);
-    addData(paymentList, &iter, 0, "KH001", 1, "Nguyễn Văn A", 2, "0123456789", 3, "52G-1", 4, "test", -1);
+    // addData(paymentList, &iter, 0, "KH001", 1, "Nguyễn Văn A", 2, "0123456789", 3, "51G-12345", 4, "Honda Wave", -1);
+    // addData(paymentList, &iter, 0, "KH001", 1, "Nguyễn Văn A", 2, "0123456789", 3, "52G-1", 4, "test", -1);
 
     gtk_tree_view_set_model(GTK_TREE_VIEW(listViewForPageThanhToan), GTK_TREE_MODEL(paymentList));
 

@@ -5,6 +5,46 @@
 #include "../components/search.h"
 #include "../components/page.h"
 #include "../utils/listStore.h"
+#include "../utils/freeMemory.h"
+#include "../../modules/customers.h"
+
+// Hàm tải nội dung từ file text vào Liststore
+void load_file_to_list_store(GtkListStore *store, const char *filename) {
+    
+    // Mở file
+    FILE *file = fopen(filename, "r");
+    if (!file) {
+        g_print("Không mở được file: %s\n", filename);
+        return;
+    }
+
+    // Tạo mảng line đọc từng hàng của file
+    char line[256];
+
+    // Dùng fgets đọc file đến khi hết dữ liệu thì dừng vòng lặp 
+    while (fgets(line, sizeof(line), file)) {
+        char id[10], name[100], phone[20], plate[20], type[50];
+        
+        // Lưu các chuỗi trong file (với đúng định dạng) vào các mảng đã khai báo
+        // %9[^|]: lưu tối đa 9 ký tự hoặc dừng lại khi gặp |
+        // %49[^\n]: lưu tối đa 49 ký tự hoặc dừng lại khi gặp \n
+        if (sscanf(line, "%9[^|]|%99[^|]|%19[^|]|%19[^|]|%49[^\n]", id, name, phone, plate, type) == 5) {
+            GtkTreeIter iter;
+
+            // Thêm hàng trong Liststore
+            gtk_list_store_append(store, &iter);
+            // Lưu vào Liststore
+            gtk_list_store_set(store, &iter, 
+                              0, id, 
+                              1, name, 
+                              2, phone, 
+                              3, plate,
+                              4, type,
+                              -1);
+        }
+    }
+    fclose(file);
+}
 
 static gboolean filter_visible_func(GtkTreeModel *model, GtkTreeIter *iter, gpointer data);
 
@@ -20,31 +60,43 @@ static void onSearchChanged(GtkSearchEntry *searchBar, GtkTreeView *listView)
     // Check if the current model is already a filter model
     if (GTK_IS_TREE_MODEL_FILTER(model))
     {
-        // Get the child model
-        model = gtk_tree_model_filter_get_model(GTK_TREE_MODEL_FILTER(model));
+        // Reuse model filter
+        filter_model = GTK_TREE_MODEL_FILTER(model);
+        // Take the original model from filter model
+        model = gtk_tree_model_filter_get_model(filter_model);
+    }
+    else 
+    {
+        // If not model filter -> create a new one
+        filter_model = GTK_TREE_MODEL_FILTER(gtk_tree_model_filter_new(model, NULL));
     }
 
+    // Take text from searchBar
     search_text = gtk_entry_get_text(GTK_ENTRY(searchBar));
 
-    // Create filter model
-    filter_model = GTK_TREE_MODEL_FILTER(gtk_tree_model_filter_new(model, NULL));
+    // Chỉ cấp phát và cập nhật text tìm kiếm lại khi search_text thay đổi
+    const gchar *old_text = g_object_get_data(G_OBJECT(filter_model), "search-text");
+    if (g_strcmp0(old_text, search_text) != 0)
+    {
+        // Store search text as object data to use in filter function
+        g_object_set_data_full(G_OBJECT(filter_model), "search-text",
+                                                g_strdup(search_text), (GDestroyNotify)g_free);
 
-    // Store search text as object data to use in filter function
-    g_object_set_data_full(G_OBJECT(filter_model), "search-text",
-                           g_strdup(search_text), (GDestroyNotify)g_free);
+    }
 
-    // Set visible function
-    gtk_tree_model_filter_set_visible_func(filter_model,
-                                           (GtkTreeModelFilterVisibleFunc)filter_visible_func, filter_model, NULL);
+    // If model filter does not exist
+    if (!GTK_IS_TREE_MODEL_FILTER(gtk_tree_view_get_model(listView)))
+    {
+        // Set visible function
+        gtk_tree_model_filter_set_visible_func(filter_model,
+            (GtkTreeModelFilterVisibleFunc)filter_visible_func, filter_model, NULL);
+
+        // Link filter model with TreeView
+        gtk_tree_view_set_model(listView, GTK_TREE_MODEL(filter_model));
+    }
 
     // Apply the filter
     gtk_tree_model_filter_refilter(filter_model);
-
-    // Set the filtered model to the tree view
-    gtk_tree_view_set_model(listView, GTK_TREE_MODEL(filter_model));
-
-    // Release our reference as the tree view will hold its own
-    g_object_unref(filter_model);
 }
 
 static gboolean filter_visible_func(GtkTreeModel *model, GtkTreeIter *iter, gpointer data)
@@ -55,7 +107,7 @@ static gboolean filter_visible_func(GtkTreeModel *model, GtkTreeIter *iter, gpoi
     gboolean visible = TRUE;
 
     // If search text is empty, show all rows
-    if (search_text == NULL || strlen(search_text) == 0)
+    if (search_text == NULL || search_text[0] == '\0')
     {
         return TRUE;
     }
@@ -73,7 +125,7 @@ static gboolean filter_visible_func(GtkTreeModel *model, GtkTreeIter *iter, gpoi
     return visible;
 }
 
-GtkWidget *createCustomerPage(GtkWidget *notebook)
+GtkWidget *createCustomerPage(GtkWidget *notebook, GtkWidget *window)
 {
     GtkWidget *page;
     page = createPage(notebook, GTK_ORIENTATION_HORIZONTAL, 10, "Khách hàng");
@@ -99,16 +151,23 @@ GtkWidget *createCustomerPage(GtkWidget *notebook)
 
     // Khởi tạo model cho danh sách khách hàng
     GtkListStore *customerList = createListStore(5, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
-    GtkTreeIter iter;
-
-    // Test data
-    addData(customerList, &iter, 0, "KH001", 1, "Nguyễn Văn A", 2, "0123456789", 3, "51G-12345", 4, "Honda Wave", -1);
-    addData(customerList, &iter, 0, "KH001", 1, "Nguyễn Văn A", 2, "0123456789", 3, "52G-1", 4, "test", -1);
+    
+    // Tải dữ liệu file text vào Liststore khi khởi động chương trình
+    load_file_to_list_store(customerList, "../database/customers.txt");
 
     gtk_tree_view_set_model(GTK_TREE_VIEW(listViewForPageKhachHang), GTK_TREE_MODEL(customerList));
 
     // Handle search bar
     g_signal_connect(searchBarForPageKhachHang, "changed", G_CALLBACK(onSearchChanged), listViewForPageKhachHang);
+
+    // Handle "Thêm khách hàng" button
+    CustomerData *user_data = g_new(CustomerData, 1);
+    user_data->main_window = window;
+    user_data->store = customerList;
+    g_signal_connect(buttonThemKhachHang, "clicked", G_CALLBACK(addCustomers), user_data);
+
+    // Giải phóng user_data khi dừng chương trình
+    g_signal_connect(window, "destroy", G_CALLBACK(free_memory_when_main_window_destroy), user_data);
 
     return page;
 }

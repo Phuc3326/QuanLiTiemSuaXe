@@ -3,6 +3,6 @@
 
 #include <gtk/gtk.h>
 
-GtkWidget *createStatisticalPage(GtkWidget *notebook);
+GtkWidget *createStatisticalPage(GtkWidget *notebook, GtkWidget *window);
 
 #endif

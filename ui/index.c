@@ -13,10 +13,10 @@
 void createUI(GtkWidget *window)
 {
     GtkWidget *notebook = createNotebook(window);
-    createCustomerPage(notebook);
-    createServicePage(notebook);
-    createPaymentPage(notebook);
-    createStatisticalPage(notebook);
+    createCustomerPage(notebook, window);
+    createServicePage(notebook, window);
+    createPaymentPage(notebook, window);
+    createStatisticalPage(notebook, window);
 }
 
 /**
