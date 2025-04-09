@@ -22,5 +22,7 @@ typedef struct {
 
 void addCustomers(GtkWidget *widget, gpointer user_data);
 void addData(GtkListStore *store, const char *filename, ...);
+void deleteCustomers(GtkWidget *widget, gpointer user_data);
+void editCustomers(GtkWidget *widget, gpointer user_data);
 
 #endif

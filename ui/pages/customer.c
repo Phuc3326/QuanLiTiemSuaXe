@@ -166,6 +166,12 @@ GtkWidget *createCustomerPage(GtkWidget *notebook, GtkWidget *window)
     user_data->store = customerList;
     g_signal_connect(buttonThemKhachHang, "clicked", G_CALLBACK(addCustomers), user_data);
 
+    // Handle "Xóa khách hàng" button
+    g_signal_connect(buttonXoaKhachHang, "clicked", G_CALLBACK(deleteCustomers), user_data);
+
+    // Handle "Sửa khách hàng" button
+    g_signal_connect(buttonSuaKhachHang, "clicked", G_CALLBACK(editCustomers), user_data);
+
     // Giải phóng user_data khi dừng chương trình
     g_signal_connect(window, "destroy", G_CALLBACK(free_memory_when_main_window_destroy), user_data);
 

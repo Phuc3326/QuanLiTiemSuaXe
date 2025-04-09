@@ -146,3 +146,127 @@ void addCustomers(GtkWidget *widget, gpointer user_data) {
 
     g_signal_connect(save_button, "clicked", G_CALLBACK(on_save_clicked), add_data);
 }
+
+void deleteCustomers(GtkWidget *widget, gpointer user_data)
+{
+    CustomerData *data = (CustomerData *)user_data;
+
+    // Thiết lập cửa sổ
+    GtkWidget *deleteCustomers_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    gtk_window_set_title(GTK_WINDOW(deleteCustomers_window), "Xóa khách hàng");
+    gtk_window_set_transient_for(GTK_WINDOW(deleteCustomers_window), GTK_WINDOW(data->main_window));  // Gắn vào cửa sổ chính
+    gtk_window_set_modal(GTK_WINDOW(deleteCustomers_window), TRUE);  // Làm cửa sổ phụ modal
+    gtk_window_set_default_size(GTK_WINDOW(deleteCustomers_window), 300, 200);
+    gtk_window_set_position(GTK_WINDOW(deleteCustomers_window), GTK_WIN_POS_CENTER);
+
+    // Thiết lập các box trong cửa sổ
+    GtkWidget *box_big = createBox(deleteCustomers_window, GTK_ORIENTATION_VERTICAL, 10); // Box lớn chứa 3 box con
+    GtkWidget *box_entry = createBox(box_big, GTK_ORIENTATION_HORIZONTAL, 10); // Box chứa thanh tìm kiếm
+    GtkWidget *box_information = createBox(box_big, GTK_ORIENTATION_HORIZONTAL, 10); // Box chứa thông tin của khách hàng tìm kiếm
+    GtkWidget *box_delete = createBox(box_big, GTK_ORIENTATION_VERTICAL, 10); // Box chứa nút cancel và delete
+
+    // Thiết lập cho box_entry
+    GtkWidget *label = createLabel(box_entry, "Nhập vào biển số xe:");
+    GtkWidget *entry = createSearch(box_entry);
+    gtk_entry_set_placeholder_text(GTK_ENTRY(entry), "Nhập chính xác biển số muốn xóa");
+    gtk_entry_set_width_chars(GTK_ENTRY(entry), 80);
+    GtkWidget *find_button = createButton(box_entry, "Tìm");
+
+    // Thiết lập cho box_information
+    GtkWidget *grid = createGrid(box_information);
+
+    GtkWidget *id_label = gtk_label_new("Mã KH:");
+    GtkWidget *name_label = gtk_label_new("Tên KH:");
+    GtkWidget *numberphone_label = gtk_label_new("SĐT:");
+    GtkWidget *numberplate_label = gtk_label_new("Biển số:");
+    GtkWidget *cartype_label = gtk_label_new("Loại xe:");
+
+    gtk_grid_attach(GTK_GRID(grid), id_label, 0, 0, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), name_label, 0, 1, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), numberphone_label, 0, 2, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), numberplate_label, 0, 3, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), cartype_label, 0, 4, 1, 1);
+
+    // Xử lí lấy thông tin từ Liststore để hiển thị
+
+    // Thiết lập cho box_delete
+    GtkWidget *confirm_label = createLabel(box_delete, "Bạn có chắc chắn muốn xóa khách hàng này?");
+    GtkWidget *confirm_box = createBox(box_delete, GTK_ORIENTATION_HORIZONTAL, 40);
+    gtk_widget_set_halign(confirm_box, GTK_ALIGN_CENTER); // Căn giữa theo chiều ngang
+    gtk_widget_set_valign(confirm_box, GTK_ALIGN_CENTER); // Căn giữa theo chiều dọc
+    GtkWidget *cancel_button = createButton(confirm_box, "CANCEL");
+    GtkWidget *delete_button = createButton(confirm_box, "DELETE");
+
+    // Hiển thị cửa sổ con
+    gtk_widget_show_all(deleteCustomers_window);
+
+    // Handle DELETE button
+}
+
+void editCustomers(GtkWidget *widget, gpointer user_data)
+{
+    CustomerData *data = (CustomerData *)user_data;
+
+    // Thiết lập cửa sổ
+    GtkWidget *editCustomers_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    gtk_window_set_title(GTK_WINDOW(editCustomers_window), "Sửa khách hàng");
+    gtk_window_set_transient_for(GTK_WINDOW(editCustomers_window), GTK_WINDOW(data->main_window));  // Gắn vào cửa sổ chính
+    gtk_window_set_modal(GTK_WINDOW(editCustomers_window), TRUE);  // Làm cửa sổ phụ modal
+    gtk_window_set_default_size(GTK_WINDOW(editCustomers_window), 300, 200);
+    gtk_window_set_position(GTK_WINDOW(editCustomers_window), GTK_WIN_POS_CENTER);
+
+    // Thiết lập các box trong cửa sổ
+    GtkWidget *box_big = createBox(editCustomers_window, GTK_ORIENTATION_VERTICAL, 10); // Box lớn chứa 3 box con
+    GtkWidget *box_entry = createBox(box_big, GTK_ORIENTATION_HORIZONTAL, 10); // Box chứa thanh tìm kiếm
+    GtkWidget *box_information = createBox(box_big, GTK_ORIENTATION_HORIZONTAL, 10); // Box chứa thông tin của khách hàng tìm kiếm
+    GtkWidget *box_delete = createBox(box_big, GTK_ORIENTATION_VERTICAL, 10); // Box chứa nút cancel và edit
+
+    // Thiết lập cho box_entry
+    GtkWidget *label = createLabel(box_entry, "Nhập vào biển số xe:");
+    GtkWidget *entry = createSearch(box_entry);
+    gtk_entry_set_placeholder_text(GTK_ENTRY(entry), "Nhập chính xác biển số muốn chỉnh sửa");
+    gtk_entry_set_width_chars(GTK_ENTRY(entry), 80);
+    GtkWidget *find_button = createButton(box_entry, "Tìm");
+
+    // Thiết lập cho box_information
+    GtkWidget *grid = createGrid(box_information);
+
+    GtkWidget *id_label = gtk_label_new("Mã KH:");
+    GtkWidget *name_label = gtk_label_new("Tên KH:");
+    GtkWidget *numberphone_label = gtk_label_new("SĐT:");
+    GtkWidget *numberplate_label = gtk_label_new("Biển số:");
+    GtkWidget *cartype_label = gtk_label_new("Loại xe:");
+
+    gtk_grid_attach(GTK_GRID(grid), id_label, 0, 0, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), name_label, 0, 1, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), numberphone_label, 0, 2, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), numberplate_label, 0, 3, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), cartype_label, 0, 4, 1, 1);
+
+    GtkWidget *id_entry =  gtk_search_entry_new();
+    GtkWidget *name_entry =  gtk_search_entry_new();
+    GtkWidget *numberphone_entry =  gtk_search_entry_new();
+    GtkWidget *numberplate_entry =  gtk_search_entry_new();
+    GtkWidget *cartype_entry =  gtk_search_entry_new();
+
+    gtk_grid_attach(GTK_GRID(grid), id_entry, 1, 0, 2, 1);
+    gtk_grid_attach(GTK_GRID(grid), name_entry, 1, 1, 2, 1);
+    gtk_grid_attach(GTK_GRID(grid), numberphone_entry, 1, 2, 2, 1);
+    gtk_grid_attach(GTK_GRID(grid), numberplate_entry, 1, 3, 2, 1);
+    gtk_grid_attach(GTK_GRID(grid), cartype_entry, 1, 4, 2, 1);
+
+    // Xử lí lấy thông tin từ Liststore để hiển thị
+
+    // Thiết lập cho box_delete
+    GtkWidget *confirm_label = createLabel(box_delete, "Bạn có chắc chắn muốn chỉnh sửa khách hàng này?");
+    GtkWidget *confirm_box = createBox(box_delete, GTK_ORIENTATION_HORIZONTAL, 40);
+    gtk_widget_set_halign(confirm_box, GTK_ALIGN_CENTER); // Căn giữa theo chiều ngang
+    gtk_widget_set_valign(confirm_box, GTK_ALIGN_CENTER); // Căn giữa theo chiều dọc
+    GtkWidget *cancel_button = createButton(confirm_box, "CANCEL");
+    GtkWidget *delete_button = createButton(confirm_box, "EDIT");
+
+    // Hiển thị cửa sổ con
+    gtk_widget_show_all(editCustomers_window);
+
+    // Handle DELETE button
+}
