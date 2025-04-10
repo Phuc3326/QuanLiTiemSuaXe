@@ -17,6 +17,7 @@ file(GLOB_RECURSE SRC_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/utils/freeMemory.c
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/components/scrolled.c
     ${CMAKE_CURRENT_SOURCE_DIR}/modules/*.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/modules/services.c
     ${CMAKE_CURRENT_SOURCE_DIR}/main.c # Include main.c here
 )
 

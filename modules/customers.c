@@ -16,7 +16,7 @@
  * @param ...args Các dữ liệu
  * @param filename tên của file text cần ghi thông tin
  */
-void addData(GtkListStore *store, const char *filename, ...)
+static void addData(GtkListStore *store, const char *filename, ...)
 {
     // Thêm dữ liệu vào ListStore
     va_list args;
