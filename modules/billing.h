@@ -1,0 +1,24 @@
+#ifndef BILLING_H
+#define BILLING_H
+
+#include <gtk/gtk.h>
+
+// Struct để truyền vào hàm addBill
+typedef struct 
+{
+    GtkWidget *main_window;
+    GtkListStore *store;
+} BillData;
+
+// Struct để truyền vào hàm on_create_clicked
+typedef struct {
+    GtkWidget *id_entry;
+    GtkWidget *time_entry;
+    GtkListStore *store;
+} AddBillData;
+
+void addBill(GtkWidget *widget, gpointer user_data);
+static void addData(GtkListStore *store, const char *filename, ...);
+void exportBill(GtkWidget *widget, gpointer user_data);
+
+#endif
