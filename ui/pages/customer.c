@@ -9,7 +9,7 @@
 #include "../../modules/customers.h"
 
 // Hàm tải nội dung từ file text vào Liststore
-void load_file_to_list_store(GtkListStore *store, const char *filename) {
+static void load_file_txt_to_liststore(GtkListStore *store, const char *filename) {
     
     // Mở file
     FILE *file = fopen(filename, "r");
@@ -154,7 +154,7 @@ GtkWidget *createCustomerPage(GtkWidget *notebook, GtkWidget *window)
     GtkListStore *customerList = createListStore(5, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
     
     // Tải dữ liệu file text vào Liststore khi khởi động chương trình
-    load_file_to_list_store(customerList, "../database/customers.txt");
+    load_file_txt_to_liststore(customerList, "../database/customers.txt");
 
     gtk_tree_view_set_model(GTK_TREE_VIEW(listViewForPageKhachHang), GTK_TREE_MODEL(customerList));
 
