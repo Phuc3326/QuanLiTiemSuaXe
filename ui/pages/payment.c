@@ -23,12 +23,12 @@ static void load_file_txt_to_liststore(GtkListStore *store, const char *filename
 
     // Dùng fgets đọc file đến khi hết dữ liệu thì dừng vòng lặp 
     while (fgets(line, sizeof(line), file)) {
-        char id[10], time[20];
+        char id[10], time[20], id_cus[10], id_ser[10];
         
         // Lưu các chuỗi trong file (với đúng định dạng) vào các mảng đã khai báo
         // %9[^|]: lưu tối đa 9 ký tự hoặc dừng lại khi gặp |
         // %49[^\n]: lưu tối đa 49 ký tự hoặc dừng lại khi gặp \n
-        if (sscanf(line, "%9[^|]|%19[^\n]", id, time) == 2) {
+        if (sscanf(line, "%9[^|]|%19[^|]|%9[^|]|%9[^\n]", id, time, id_cus, id_ser) == 4) {
             GtkTreeIter iter;
 
             // Thêm hàng trong Liststore
@@ -37,6 +37,8 @@ static void load_file_txt_to_liststore(GtkListStore *store, const char *filename
             gtk_list_store_set(store, &iter, 
                               0, id, 
                               1, time,
+                              2, id_cus,
+                              3, id_ser,
                               -1);
         }
     }
@@ -146,7 +148,7 @@ GtkWidget *createPaymentPage(GtkWidget *notebook, GtkWidget *window)
     createColumns(listViewForPageHoaDon, columnNames, 4);
 
     // Khởi tạo model cho danh sách hóa đơn
-    GtkListStore *billingList = createListStore(2, G_TYPE_STRING, G_TYPE_STRING);
+    GtkListStore *billingList = createListStore(4, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
     
     // Tải dữ liệu file text vào Liststore khi khởi động chương trình
     load_file_txt_to_liststore(billingList, "../database/bills.txt");

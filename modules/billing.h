@@ -14,6 +14,8 @@ typedef struct
 typedef struct {
     GtkWidget *id_entry;
     GtkWidget *time_entry;
+    GtkWidget *id_cus_entry;
+    GtkWidget *id_ser_entry;
     GtkListStore *store;
 } AddBillData;
 

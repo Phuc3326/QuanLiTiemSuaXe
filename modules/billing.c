@@ -41,12 +41,14 @@ static void addData(GtkListStore *store, const char *filename, ...)
     // Lấy dữ liệu từ liststore rồi ghi file
     while (valid)
     {
-    const char *id, *time;
+    const char *id, *time, *id_cus, *id_ser;
     gtk_tree_model_get(GTK_TREE_MODEL(store), &iter,
                         0, &id,
                         1, &time,
+                        2, &id_cus,
+                        3, &id_ser,
                         -1);
-    fprintf(file_pointer, "%s|%s\n", id, time);
+    fprintf(file_pointer, "%s|%s|%s|%s\n", id, time, id_cus, id_ser);
     valid = gtk_tree_model_iter_next(GTK_TREE_MODEL(store), &iter);
     }
 
@@ -59,11 +61,15 @@ static void on_create_clicked(GtkButton *button, gpointer add_data) {
     AddBillData *data = (AddBillData *)add_data;
     const gchar *id = gtk_entry_get_text(GTK_ENTRY(data->id_entry));
     const gchar *time = gtk_entry_get_text(GTK_ENTRY(data->time_entry));
+    const gchar *id_cus = gtk_entry_get_text(GTK_ENTRY(data->id_cus_entry));
+    const gchar *id_ser = gtk_entry_get_text(GTK_ENTRY(data->id_ser_entry));
 
     // Thêm dữ liệu vào Liststore và vào file
     addData(data->store, "../database/bills.txt",
         0, id,
         1, time,
+        2, id_cus,
+        3, id_ser,
         -1);
 
     g_free(data);
@@ -127,6 +133,8 @@ void addBill(GtkWidget *widget, gpointer user_data) {
     AddBillData *add_data = g_new(AddBillData, 1);
     add_data->id_entry = id_bil_entry;
     add_data->time_entry = time_entry;
+    add_data->id_cus_entry = id_cus_entry;
+    add_data->id_ser_entry = id_ser_entry;
     add_data->store = data->store;
 
     g_signal_connect(create_button, "clicked", G_CALLBACK(on_create_clicked), add_data);
