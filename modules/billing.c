@@ -72,6 +72,7 @@ static void on_create_clicked(GtkButton *button, gpointer add_data) {
         3, id_ser,
         -1);
 
+    // Giải phóng AddBillData
     g_free(data);
 
     // Đóng cửa sổ sau khi lưu dữ liệu

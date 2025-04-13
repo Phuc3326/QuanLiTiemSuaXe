@@ -20,6 +20,14 @@ typedef struct {
     GtkListStore *store;
 } AddCustomerData;
 
+typedef struct 
+{
+    GtkListStore *list_store; 
+    gint search_column; 
+    GtkTreeIter *result_iter;
+    GtkWidget *grid;
+} FindIterOfSearch;
+
 void addCustomers(GtkWidget *widget, gpointer user_data);
 static void addData(GtkListStore *store, const char *filename, ...);
 void deleteCustomers(GtkWidget *widget, gpointer user_data);
