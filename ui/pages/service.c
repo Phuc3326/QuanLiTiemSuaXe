@@ -139,8 +139,8 @@ GtkWidget *createServicePage(GtkWidget *notebook, GtkWidget *window)
     gtk_widget_set_size_request(searchBarForPageDichVu, 300, -1);
 
     GtkWidget *buttonThemDichVu = createButton(menuBoxForPageDichVu, "Thêm dịch vụ");
-    GtkWidget *buttonSuaDichVu = createButton(menuBoxForPageDichVu, "Sửa dịch vụ");
     GtkWidget *buttonXoaDichVu = createButton(menuBoxForPageDichVu, "Xóa dịch vụ");
+    GtkWidget *buttonSuaDichVu = createButton(menuBoxForPageDichVu, "Sửa dịch vụ");
 
     // Hiển thị danh sách khách hàng
     GtkWidget *listViewForPageDichVu = createTreeView(page);
@@ -170,7 +170,7 @@ GtkWidget *createServicePage(GtkWidget *notebook, GtkWidget *window)
     // Handle "Sửa dịch vụ" button
     g_signal_connect(buttonSuaDichVu, "clicked", G_CALLBACK(editServices), service_data);
 
-    // Giải phóng service_data khi dừng chương trình
+    // Giải phóng ServiceData khi dừng chương trình
     g_signal_connect(window, "destroy", G_CALLBACK(free_memory_when_main_window_destroy), service_data);
 
     return page;

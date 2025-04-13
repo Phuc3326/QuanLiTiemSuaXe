@@ -9,6 +9,10 @@
 #include "components/grid.h"
 #include "components/button.h"
 #include "components/scrolled.h"
+#include "../ui/utils/get_last_iter.h"
+#include "../ui/utils/search_in_model.h"
+#include "../ui/utils/freeMemory.h"
+#include "../ui/utils/update_txt.h"
 
 /**
  * Thêm dữ liệu vào list store
@@ -29,38 +33,27 @@ static void addData(GtkListStore *store, const char *filename, ...)
     va_end(args);
 
     // Thêm dữ liệu vào file customers.txt
-    // Mở file
-    FILE *file_pointer = fopen(filename, "w");
-
-    // Nếu không mở được file thì thoát
-    if (!file_pointer) return;
-
-    // Lấy con trỏ đến hàng đầu tiên trong Listore
-    gboolean valid = gtk_tree_model_get_iter_first(GTK_TREE_MODEL(store), &iter);
-
-    // Lấy dữ liệu từ liststore rồi ghi file
-    while (valid)
-    {
-    const char *id, *name, *numberphone, *numberplate, *cartype;
-    gtk_tree_model_get(GTK_TREE_MODEL(store), &iter,
-                        0, &id,
-                        1, &name,
-                        2, &numberphone,
-                        3, &numberplate,
-                        4, &cartype,
-                        -1);
-    fprintf(file_pointer, "%s|%s|%s|%s|%s\n", id, name, numberphone, numberplate, cartype);
-    valid = gtk_tree_model_iter_next(GTK_TREE_MODEL(store), &iter);
-    }
-
-    // Đóng file
-    fclose(file_pointer);
+    updateTXT(store, filename);
 }
 
 static void on_save_clicked(GtkButton *button, gpointer add_data) {
-    // Lấy các giá trị đã nhập
     AddCustomerData *data = (AddCustomerData *)add_data;
-    const gchar *id = gtk_entry_get_text(GTK_ENTRY(data->id_entry));
+    // Tạo id cho khách hàng mới thêm
+        // Lấy id của khách hàng cuối cùng của Liststore
+        gchar *last_id;
+        GtkTreeIter last_iter; 
+        get_last_iter(GTK_TREE_MODEL(data->store), &last_iter);
+        gtk_tree_model_get(GTK_TREE_MODEL(data->store), &last_iter, 0, &last_id, -1);
+        // Tạo id mới nhất
+        const gchar *prefix = "KH";
+        int number = atoi(last_id + strlen(prefix)); /* last_id là con trỏ tới id => +2 thì con trỏ sẽ dịch về sau 2 
+        phần tử => trỏ tới "00x". atoi là hàm biến chuỗi số thành số nguyên => lấy được 00x = x */ 
+        number++;
+        gchar new_id[10];
+        g_snprintf(new_id, sizeof(new_id), "%s%03d", prefix, number);
+
+    // Lấy các giá trị đã nhập
+    //const gchar *id = gtk_entry_get_text(GTK_ENTRY(data->id_entry));
     const gchar *name = gtk_entry_get_text(GTK_ENTRY(data->name_entry));
     const gchar *phone = gtk_entry_get_text(GTK_ENTRY(data->phone_entry));
     const gchar *plate = gtk_entry_get_text(GTK_ENTRY(data->plate_entry));
@@ -68,13 +61,14 @@ static void on_save_clicked(GtkButton *button, gpointer add_data) {
 
     // Thêm dữ liệu vào Liststore và vào file
     addData(data->store, "../database/customers.txt",
-        0, id,
+        0, new_id,
         1, name,
         2, phone,
         3, plate,
         4, type,
         -1);
 
+    // Giải phóng AddCustomerData
     g_free(data);
 
     // Đóng cửa sổ sau khi lưu dữ liệu
@@ -82,6 +76,56 @@ static void on_save_clicked(GtkButton *button, gpointer add_data) {
     gtk_widget_destroy(window);
 }
 
+void on_delete_button_clicked(GtkWidget *widget, gpointer user_data)
+{
+    FindIterOfSearch *data = (FindIterOfSearch *)user_data;
+
+    // Kiểm tra xem iter đã được tìm thấy chưa (tránh lỗi khi nhấn delete mà chưa tìm)
+    if (data->result_iter != NULL)
+    {
+        gtk_list_store_remove(data->list_store, data->result_iter);
+        g_print("Đã xóa khách hàng.\n");
+    }
+    // Update dữ liệu cho file txt
+    updateTXT(data->list_store, "../database/customers.txt");
+
+    // Đóng cửa sổ sau khi lưu dữ liệu
+    GtkWidget *window = gtk_widget_get_toplevel(GTK_WIDGET(widget));
+    gtk_widget_destroy(window);
+}
+
+void on_edit_button_clicked(GtkButton *button, gpointer user_data) {
+    FindIterOfSearch *data = (FindIterOfSearch *)user_data;
+
+    // Lấy dữ liệu mới từ GtkEntry
+    const gchar *new_id = gtk_entry_get_text(GTK_ENTRY(data->id_entry));
+    const gchar *new_name = gtk_entry_get_text(GTK_ENTRY(data->name_entry));
+    const gchar *new_phone = gtk_entry_get_text(GTK_ENTRY(data->numberphone_entry));
+    const gchar *new_plate = gtk_entry_get_text(GTK_ENTRY(data->numberplate_entry));
+    const gchar *new_type = gtk_entry_get_text(GTK_ENTRY(data->cartype_entry));
+
+    // Cập nhật lại dữ liệu trong GtkListStore
+    if (data->result_iter != NULL) {
+        gtk_list_store_set(data->list_store, data->result_iter,
+            0, new_id,
+            1, new_name,
+            2, new_phone,
+            3, new_plate,
+            4, new_type,
+            -1);
+        
+        g_print("Khách hàng đã được chỉnh sửa thành công!\n");
+    } else {
+        g_print("Không tìm thấy dòng cần chỉnh sửa!\n");
+    }
+
+    // Update dữ liệu cho file txt
+    updateTXT(data->list_store, "../database/customers.txt");
+
+    // Đóng cửa sổ sau khi lưu dữ liệu
+    GtkWidget *window = gtk_widget_get_toplevel(GTK_WIDGET(button));
+    gtk_widget_destroy(window);
+}
 // Feature add infomation of customers
 void addCustomers(GtkWidget *widget, gpointer user_data) {
     CustomerData *data = (CustomerData *)user_data;
@@ -98,28 +142,28 @@ void addCustomers(GtkWidget *widget, gpointer user_data) {
     GtkWidget *grid = createGrid(addCustomers_window);
 
     // Tạo các label
-    GtkWidget *id_label = gtk_label_new("Mã KH:");
+    //GtkWidget *id_label = gtk_label_new("Mã KH:");
     GtkWidget *name_label = gtk_label_new("Tên KH:");
     GtkWidget *numberphone_label = gtk_label_new("SĐT:");
     GtkWidget *numberplate_label = gtk_label_new("Biển số:");
     GtkWidget *cartype_label = gtk_label_new("Loại xe:");
 
     // Đặt các label vào grid
-    gtk_grid_attach(GTK_GRID(grid), id_label, 0, 0, 1, 1);
+    //gtk_grid_attach(GTK_GRID(grid), id_label, 0, 0, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), name_label, 0, 1, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), numberphone_label, 0, 2, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), numberplate_label, 0, 3, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), cartype_label, 0, 4, 1, 1);
 
     // Tạo các entry
-    GtkWidget *id_entry =  gtk_search_entry_new();
+    //GtkWidget *id_entry =  gtk_search_entry_new();
     GtkWidget *name_entry =  gtk_search_entry_new();
     GtkWidget *numberphone_entry =  gtk_search_entry_new();
     GtkWidget *numberplate_entry =  gtk_search_entry_new();
     GtkWidget *cartype_entry =  gtk_search_entry_new();
 
     // Đặt các entry vào grid
-    gtk_grid_attach(GTK_GRID(grid), id_entry, 1, 0, 2, 1);
+    //gtk_grid_attach(GTK_GRID(grid), id_entry, 1, 0, 2, 1);
     gtk_grid_attach(GTK_GRID(grid), name_entry, 1, 1, 2, 1);
     gtk_grid_attach(GTK_GRID(grid), numberphone_entry, 1, 2, 2, 1);
     gtk_grid_attach(GTK_GRID(grid), numberplate_entry, 1, 3, 2, 1);
@@ -138,7 +182,7 @@ void addCustomers(GtkWidget *widget, gpointer user_data) {
 
     // Handle SAVE button
     AddCustomerData *add_data = g_new(AddCustomerData, 1);
-    add_data->id_entry = id_entry;
+    //add_data->id_entry = id_entry;
     add_data->name_entry = name_entry;
     add_data->phone_entry = numberphone_entry;
     add_data->plate_entry = numberplate_entry;
@@ -169,11 +213,10 @@ void deleteCustomers(GtkWidget *widget, gpointer user_data)
     GtkWidget *box_delete = createBox(box_big, GTK_ORIENTATION_VERTICAL, 10); // Box chứa nút cancel và delete
 
     // Thiết lập cho box_entry
-    GtkWidget *label = createLabel(box_entry, "Nhập vào biển số xe:");
+    GtkWidget *label = createLabel(box_entry, "Nhập vào mã KH:");
     GtkWidget *entry = createSearch(box_entry);
-    gtk_entry_set_placeholder_text(GTK_ENTRY(entry), "Nhập chính xác biển số muốn xóa");
+    gtk_entry_set_placeholder_text(GTK_ENTRY(entry), "Nhập chính xác mã khách hàng muốn xóa");
     gtk_entry_set_width_chars(GTK_ENTRY(entry), 80);
-    GtkWidget *find_button = createButton(box_entry, "Tìm");
 
     // Thiết lập cho box_information
     GtkWidget *grid = createGrid(box_information);
@@ -190,7 +233,13 @@ void deleteCustomers(GtkWidget *widget, gpointer user_data)
     gtk_grid_attach(GTK_GRID(grid), numberplate_label, 0, 3, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), cartype_label, 0, 4, 1, 1);
 
-    // Xử lí lấy thông tin từ Liststore để hiển thị
+    // Lấy thông tin từ Liststore để hiển thị
+    FindIterOfSearch *findData = g_new(FindIterOfSearch, 1);
+    findData->list_store = data->store;
+    findData->search_column = 0;
+    findData->result_iter = g_new(GtkTreeIter, 1);  // cấp phát cho iter
+    findData->grid = grid;
+    g_signal_connect(entry, "changed", G_CALLBACK(search_in_liststore_delete), findData);
 
     // Thiết lập cho box_delete
     GtkWidget *confirm_label = createLabel(box_delete, "Bạn có chắc chắn muốn xóa khách hàng này?");
@@ -204,8 +253,13 @@ void deleteCustomers(GtkWidget *widget, gpointer user_data)
     gtk_widget_show_all(deleteCustomers_window);
 
     // Handle DELETE button
+    g_signal_connect(delete_button, "clicked", G_CALLBACK(on_delete_button_clicked), findData);
 
+    // Handle CANCEL button
     g_signal_connect_swapped(cancel_button, "clicked", G_CALLBACK(gtk_widget_destroy), deleteCustomers_window);
+
+    // Giải phóng FindIterOfSearch
+    g_signal_connect(deleteCustomers_window, "destroy", G_CALLBACK(free_memory_when_main_window_destroy), findData);
 }
 
 void editCustomers(GtkWidget *widget, gpointer user_data)
@@ -227,11 +281,10 @@ void editCustomers(GtkWidget *widget, gpointer user_data)
     GtkWidget *box_edit = createBox(box_big, GTK_ORIENTATION_VERTICAL, 10); // Box chứa nút cancel và edit
 
     // Thiết lập cho box_entry
-    GtkWidget *label = createLabel(box_entry, "Nhập vào biển số xe:");
+    GtkWidget *label = createLabel(box_entry, "Nhập vào mã KH:");
     GtkWidget *entry = createSearch(box_entry);
-    gtk_entry_set_placeholder_text(GTK_ENTRY(entry), "Nhập chính xác biển số muốn chỉnh sửa");
+    gtk_entry_set_placeholder_text(GTK_ENTRY(entry), "Nhập chính xác mã khách hàng muốn chỉnh sửa");
     gtk_entry_set_width_chars(GTK_ENTRY(entry), 80);
-    GtkWidget *find_button = createButton(box_entry, "Tìm");
 
     // Thiết lập cho box_information
     GtkWidget *grid = createGrid(box_information);
@@ -271,6 +324,17 @@ void editCustomers(GtkWidget *widget, gpointer user_data)
     gtk_widget_set_halign(cartype_entry, GTK_ALIGN_FILL);
 
     // Xử lí lấy thông tin từ Liststore để hiển thị
+    FindIterOfSearch *findData = g_new(FindIterOfSearch, 1);
+    findData->list_store = data->store;
+    findData->search_column = 0;
+    findData->result_iter = g_new(GtkTreeIter, 1);  // cấp phát cho iter
+    findData->grid = grid;
+    findData->id_entry = id_entry;
+    findData->name_entry = name_entry;
+    findData->numberphone_entry = numberphone_entry;
+    findData->numberplate_entry = numberplate_entry;
+    findData->cartype_entry = cartype_entry;
+    g_signal_connect(entry, "changed", G_CALLBACK(search_in_liststore_edit), findData);
 
     // Thiết lập cho box_edit
     GtkWidget *confirm_label = createLabel(box_edit, "Bạn có chắc chắn muốn chỉnh sửa khách hàng này?");
@@ -284,8 +348,13 @@ void editCustomers(GtkWidget *widget, gpointer user_data)
     gtk_widget_show_all(editCustomers_window);
 
     // Handle EDIT button
+    g_signal_connect(edit_button, "clicked", G_CALLBACK(on_edit_button_clicked), findData);
 
+    // Handle CANCEL button
     g_signal_connect_swapped(cancel_button, "clicked", G_CALLBACK(gtk_widget_destroy), editCustomers_window);
+
+    // Giải phóng FindIterOfSearch
+    g_signal_connect(editCustomers_window, "destroy", G_CALLBACK(free_memory_when_main_window_destroy), findData);
 }
 
 void historyCustomers(GtkWidget *widget, gpointer user_data)
@@ -307,11 +376,10 @@ void historyCustomers(GtkWidget *widget, gpointer user_data)
     GtkWidget *box_back = createBox(box_big, GTK_ORIENTATION_VERTICAL, 10); // Box chứa nút Back
 
     // Thiết lập cho box_entry
-    GtkWidget *label = createLabel(box_entry, "Nhập vào biển số xe:");
+    GtkWidget *label = createLabel(box_entry, "Nhập vào mã KH:");
     GtkWidget *entry = createSearch(box_entry);
-    gtk_entry_set_placeholder_text(GTK_ENTRY(entry), "Nhập chính xác biển số muốn xem lịch sử");
+    gtk_entry_set_placeholder_text(GTK_ENTRY(entry), "Nhập chính xác mã khách hàng muốn xem lịch sử");
     gtk_entry_set_width_chars(GTK_ENTRY(entry), 80);
-    GtkWidget *find_button = createButton(box_entry, "Tìm");
 
     // Thiết lập cho box_information
     // box_information gồm một grid bên trái hiện thông tin khách hàng và box bên phải hiện lịch sử
@@ -335,7 +403,13 @@ void historyCustomers(GtkWidget *widget, gpointer user_data)
     gtk_grid_attach(GTK_GRID(grid), cartype_label, 0, 4, 1, 1);
 
     // Xử lí lấy thông tin từ Liststore để hiển thị
-    
+    FindIterOfSearch *findData = g_new(FindIterOfSearch, 1);
+    findData->list_store = data->store;
+    findData->search_column = 0;
+    findData->result_iter = g_new(GtkTreeIter, 1);  // cấp phát cho iter
+    findData->grid = grid;
+    g_signal_connect(entry, "changed", G_CALLBACK(search_in_liststore_delete), findData);
+
     // Box lịch sử
     GtkWidget *box_history =gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
     gtk_box_pack_start(GTK_BOX(box_information), box_history, TRUE, TRUE, 0);
@@ -357,7 +431,7 @@ void historyCustomers(GtkWidget *widget, gpointer user_data)
     // Tạo thanh cuộn cho grid_history ở trong box_history
     GtkWidget *scrolled = createScrolled(box_history, grid_history);
 
-    // Xử lí lấy lịch sử từ Liststore của tab service
+    // Xử lí lấy lịch sử từ Liststore của tab service và tab hóa đơn
 
     // Thiết lập box_back
     gtk_widget_set_halign(box_back, GTK_ALIGN_CENTER); // Căn giữa theo chiều ngang
@@ -366,5 +440,9 @@ void historyCustomers(GtkWidget *widget, gpointer user_data)
     // Hiển thị cửa sổ con
     gtk_widget_show_all(historyCustomers_window);
 
+    // Handle BACK button
     g_signal_connect_swapped(back_button, "clicked", G_CALLBACK(gtk_widget_destroy), historyCustomers_window);
+
+    // Giải phóng FindIterOfSearch
+    g_signal_connect(historyCustomers_window, "destroy", G_CALLBACK(free_memory_when_main_window_destroy), findData);
 }

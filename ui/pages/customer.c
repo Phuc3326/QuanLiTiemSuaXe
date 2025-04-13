@@ -141,8 +141,8 @@ GtkWidget *createCustomerPage(GtkWidget *notebook, GtkWidget *window)
     gtk_widget_set_size_request(searchBarForPageKhachHang, 300, -1);
 
     GtkWidget *buttonThemKhachHang = createButton(menuBoxForPageKhachHang, "Thêm khách hàng");
-    GtkWidget *buttonSuaKhachHang = createButton(menuBoxForPageKhachHang, "Sửa khách hàng");
     GtkWidget *buttonXoaKhachHang = createButton(menuBoxForPageKhachHang, "Xóa khách hàng");
+    GtkWidget *buttonSuaKhachHang = createButton(menuBoxForPageKhachHang, "Sửa khách hàng");
     GtkWidget *buttonLichSuKhachHang = createButton(menuBoxForPageKhachHang, "Lịch sử khách hàng");
 
     // Hiển thị danh sách khách hàng
@@ -176,7 +176,7 @@ GtkWidget *createCustomerPage(GtkWidget *notebook, GtkWidget *window)
     // Handle "Lịch sử khách hàng" button
     g_signal_connect(buttonLichSuKhachHang, "clicked", G_CALLBACK(historyCustomers), user_data);
 
-    // Giải phóng user_data khi dừng chương trình
+    // Giải phóng CustomerData khi dừng chương trình
     g_signal_connect(window, "destroy", G_CALLBACK(free_memory_when_main_window_destroy), user_data);
 
     return page;

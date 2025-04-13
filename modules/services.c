@@ -69,6 +69,7 @@ static void on_save_clicked(GtkButton *button, gpointer add_data) {
         2, cost,
         -1);
 
+    // Giải phóng AddServiceData
     g_free(data);
 
     // Đóng cửa sổ sau khi lưu dữ liệu

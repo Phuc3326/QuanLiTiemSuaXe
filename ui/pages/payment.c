@@ -167,7 +167,7 @@ GtkWidget *createPaymentPage(GtkWidget *notebook, GtkWidget *window)
     // Handle "Xuất hóa đơn" button
     g_signal_connect(buttonXuatHoaDon, "clicked", G_CALLBACK(exportBill), user_data);
 
-    // Giải phóng user_data khi dừng chương trình
+    // Giải phóng BillData khi dừng chương trình
     g_signal_connect(window, "destroy", G_CALLBACK(free_memory_when_main_window_destroy), user_data);
 
     return page;
