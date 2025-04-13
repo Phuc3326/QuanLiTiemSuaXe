@@ -217,7 +217,6 @@ void deleteCustomers(GtkWidget *widget, gpointer user_data)
     GtkWidget *entry = createSearch(box_entry);
     gtk_entry_set_placeholder_text(GTK_ENTRY(entry), "Nhập chính xác mã khách hàng muốn xóa");
     gtk_entry_set_width_chars(GTK_ENTRY(entry), 80);
-    GtkWidget *find_button = createButton(box_entry, "Tìm");
 
     // Thiết lập cho box_information
     GtkWidget *grid = createGrid(box_information);
@@ -286,7 +285,6 @@ void editCustomers(GtkWidget *widget, gpointer user_data)
     GtkWidget *entry = createSearch(box_entry);
     gtk_entry_set_placeholder_text(GTK_ENTRY(entry), "Nhập chính xác mã khách hàng muốn chỉnh sửa");
     gtk_entry_set_width_chars(GTK_ENTRY(entry), 80);
-    GtkWidget *find_button = createButton(box_entry, "Tìm");
 
     // Thiết lập cho box_information
     GtkWidget *grid = createGrid(box_information);
@@ -382,7 +380,6 @@ void historyCustomers(GtkWidget *widget, gpointer user_data)
     GtkWidget *entry = createSearch(box_entry);
     gtk_entry_set_placeholder_text(GTK_ENTRY(entry), "Nhập chính xác mã khách hàng muốn xem lịch sử");
     gtk_entry_set_width_chars(GTK_ENTRY(entry), 80);
-    GtkWidget *find_button = createButton(box_entry, "Tìm");
 
     // Thiết lập cho box_information
     // box_information gồm một grid bên trái hiện thông tin khách hàng và box bên phải hiện lịch sử
@@ -406,7 +403,13 @@ void historyCustomers(GtkWidget *widget, gpointer user_data)
     gtk_grid_attach(GTK_GRID(grid), cartype_label, 0, 4, 1, 1);
 
     // Xử lí lấy thông tin từ Liststore để hiển thị
-    
+    FindIterOfSearch *findData = g_new(FindIterOfSearch, 1);
+    findData->list_store = data->store;
+    findData->search_column = 0;
+    findData->result_iter = g_new(GtkTreeIter, 1);  // cấp phát cho iter
+    findData->grid = grid;
+    g_signal_connect(entry, "changed", G_CALLBACK(search_in_liststore_delete), findData);
+
     // Box lịch sử
     GtkWidget *box_history =gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
     gtk_box_pack_start(GTK_BOX(box_information), box_history, TRUE, TRUE, 0);
@@ -428,7 +431,7 @@ void historyCustomers(GtkWidget *widget, gpointer user_data)
     // Tạo thanh cuộn cho grid_history ở trong box_history
     GtkWidget *scrolled = createScrolled(box_history, grid_history);
 
-    // Xử lí lấy lịch sử từ Liststore của tab service
+    // Xử lí lấy lịch sử từ Liststore của tab service và tab hóa đơn
 
     // Thiết lập box_back
     gtk_widget_set_halign(box_back, GTK_ALIGN_CENTER); // Căn giữa theo chiều ngang
@@ -437,5 +440,9 @@ void historyCustomers(GtkWidget *widget, gpointer user_data)
     // Hiển thị cửa sổ con
     gtk_widget_show_all(historyCustomers_window);
 
+    // Handle BACK button
     g_signal_connect_swapped(back_button, "clicked", G_CALLBACK(gtk_widget_destroy), historyCustomers_window);
+
+    // Giải phóng FindIterOfSearch
+    g_signal_connect(historyCustomers_window, "destroy", G_CALLBACK(free_memory_when_main_window_destroy), findData);
 }
