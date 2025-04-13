@@ -10,7 +10,7 @@
 #include "components/button.h"
 #include "components/scrolled.h"
 #include "../ui/utils/get_last_iter.h"
-#include "../ui/utils/get_iter_of_search.h"
+#include "../ui/utils/search_in_model.h"
 #include "../ui/utils/freeMemory.h"
 #include "../ui/utils/update_txt.h"
 
@@ -88,12 +88,44 @@ void on_delete_button_clicked(GtkWidget *widget, gpointer user_data)
     }
     // Update dữ liệu cho file txt
     updateTXT(data->list_store, "../database/customers.txt");
-    
+
     // Đóng cửa sổ sau khi lưu dữ liệu
     GtkWidget *window = gtk_widget_get_toplevel(GTK_WIDGET(widget));
     gtk_widget_destroy(window);
 }
 
+void on_edit_button_clicked(GtkButton *button, gpointer user_data) {
+    FindIterOfSearch *data = (FindIterOfSearch *)user_data;
+
+    // Lấy dữ liệu mới từ GtkEntry
+    const gchar *new_id = gtk_entry_get_text(GTK_ENTRY(data->id_entry));
+    const gchar *new_name = gtk_entry_get_text(GTK_ENTRY(data->name_entry));
+    const gchar *new_phone = gtk_entry_get_text(GTK_ENTRY(data->numberphone_entry));
+    const gchar *new_plate = gtk_entry_get_text(GTK_ENTRY(data->numberplate_entry));
+    const gchar *new_type = gtk_entry_get_text(GTK_ENTRY(data->cartype_entry));
+
+    // Cập nhật lại dữ liệu trong GtkListStore
+    if (data->result_iter != NULL) {
+        gtk_list_store_set(data->list_store, data->result_iter,
+            0, new_id,
+            1, new_name,
+            2, new_phone,
+            3, new_plate,
+            4, new_type,
+            -1);
+        
+        g_print("Khách hàng đã được chỉnh sửa thành công!\n");
+    } else {
+        g_print("Không tìm thấy dòng cần chỉnh sửa!\n");
+    }
+
+    // Update dữ liệu cho file txt
+    updateTXT(data->list_store, "../database/customers.txt");
+
+    // Đóng cửa sổ sau khi lưu dữ liệu
+    GtkWidget *window = gtk_widget_get_toplevel(GTK_WIDGET(button));
+    gtk_widget_destroy(window);
+}
 // Feature add infomation of customers
 void addCustomers(GtkWidget *widget, gpointer user_data) {
     CustomerData *data = (CustomerData *)user_data;
@@ -208,7 +240,7 @@ void deleteCustomers(GtkWidget *widget, gpointer user_data)
     findData->search_column = 0;
     findData->result_iter = g_new(GtkTreeIter, 1);  // cấp phát cho iter
     findData->grid = grid;
-    g_signal_connect(entry, "changed", G_CALLBACK(search_in_liststore), findData);
+    g_signal_connect(entry, "changed", G_CALLBACK(search_in_liststore_delete), findData);
 
     // Thiết lập cho box_delete
     GtkWidget *confirm_label = createLabel(box_delete, "Bạn có chắc chắn muốn xóa khách hàng này?");
@@ -294,6 +326,17 @@ void editCustomers(GtkWidget *widget, gpointer user_data)
     gtk_widget_set_halign(cartype_entry, GTK_ALIGN_FILL);
 
     // Xử lí lấy thông tin từ Liststore để hiển thị
+    FindIterOfSearch *findData = g_new(FindIterOfSearch, 1);
+    findData->list_store = data->store;
+    findData->search_column = 0;
+    findData->result_iter = g_new(GtkTreeIter, 1);  // cấp phát cho iter
+    findData->grid = grid;
+    findData->id_entry = id_entry;
+    findData->name_entry = name_entry;
+    findData->numberphone_entry = numberphone_entry;
+    findData->numberplate_entry = numberplate_entry;
+    findData->cartype_entry = cartype_entry;
+    g_signal_connect(entry, "changed", G_CALLBACK(search_in_liststore_edit), findData);
 
     // Thiết lập cho box_edit
     GtkWidget *confirm_label = createLabel(box_edit, "Bạn có chắc chắn muốn chỉnh sửa khách hàng này?");
@@ -307,8 +350,13 @@ void editCustomers(GtkWidget *widget, gpointer user_data)
     gtk_widget_show_all(editCustomers_window);
 
     // Handle EDIT button
+    g_signal_connect(edit_button, "clicked", G_CALLBACK(on_edit_button_clicked), findData);
 
+    // Handle CANCEL button
     g_signal_connect_swapped(cancel_button, "clicked", G_CALLBACK(gtk_widget_destroy), editCustomers_window);
+
+    // Giải phóng FindIterOfSearch
+    g_signal_connect(editCustomers_window, "destroy", G_CALLBACK(free_memory_when_main_window_destroy), findData);
 }
 
 void historyCustomers(GtkWidget *widget, gpointer user_data)

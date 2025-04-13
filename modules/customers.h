@@ -22,10 +22,16 @@ typedef struct {
 
 typedef struct 
 {
-    GtkListStore *list_store; 
+    GtkListStore *list_store;
     gint search_column; 
     GtkTreeIter *result_iter;
     GtkWidget *grid;
+    // Các entry cần cho chức năng chỉnh sửa khách hàng
+    GtkWidget *id_entry;
+    GtkWidget *name_entry;
+    GtkWidget *numberphone_entry;
+    GtkWidget *numberplate_entry;
+    GtkWidget *cartype_entry;
 } FindIterOfSearch;
 
 void addCustomers(GtkWidget *widget, gpointer user_data);
