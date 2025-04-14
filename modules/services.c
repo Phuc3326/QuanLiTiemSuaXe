@@ -11,6 +11,7 @@
 #include "components/scrolled.h"
 #include "../ui/utils/update_txt_ser.h"
 #include "../ui/utils/freeMemory.h"
+#include "../ui/utils/search_in_model.h"
 
 /**
  * Thêm dữ liệu vào list store
@@ -50,6 +51,53 @@ static void on_save_clicked(GtkButton *button, gpointer add_data) {
 
     // Giải phóng AddServiceData
     g_free(data);
+
+    // Đóng cửa sổ sau khi lưu dữ liệu
+    GtkWidget *window = gtk_widget_get_toplevel(GTK_WIDGET(button));
+    gtk_widget_destroy(window);
+}
+
+static void on_delete_button_clicked(GtkWidget *widget, gpointer user_data)
+{
+    FindIterOfSearch_service *data = (FindIterOfSearch_service *)user_data;
+
+    // Kiểm tra xem iter đã được tìm thấy chưa (tránh lỗi khi nhấn delete mà chưa tìm)
+    if (data->result_iter != NULL)
+    {
+        gtk_list_store_remove(data->list_store, data->result_iter);
+        g_print("Đã xóa khách hàng.\n");
+    }
+    // Update dữ liệu cho file txt
+    updateTXT_ser(data->list_store, "../database/services.txt");
+
+    // Đóng cửa sổ sau khi lưu dữ liệu
+    GtkWidget *window = gtk_widget_get_toplevel(GTK_WIDGET(widget));
+    gtk_widget_destroy(window);
+}
+
+static void on_edit_button_clicked(GtkButton *button, gpointer user_data) {
+    FindIterOfSearch_service *data = (FindIterOfSearch_service *)user_data;
+
+    // Lấy dữ liệu mới từ GtkEntry
+    const gchar *new_id = gtk_entry_get_text(GTK_ENTRY(data->id_entry));
+    const gchar *new_name = gtk_entry_get_text(GTK_ENTRY(data->name_entry));
+    const gchar *new_cost = gtk_entry_get_text(GTK_ENTRY(data->cost_entry));
+
+    // Cập nhật lại dữ liệu trong GtkListStore
+    if (data->result_iter != NULL) {
+        gtk_list_store_set(data->list_store, data->result_iter,
+            0, new_id,
+            1, new_name,
+            2, new_cost,
+            -1);
+        
+        g_print("Dịch đã được chỉnh sửa thành công!\n");
+    } else {
+        g_print("Không tìm thấy dòng cần chỉnh sửa!\n");
+    }
+
+    // Update dữ liệu cho file txt
+    updateTXT_ser(data->list_store, "../database/services.txt");
 
     // Đóng cửa sổ sau khi lưu dữ liệu
     GtkWidget *window = gtk_widget_get_toplevel(GTK_WIDGET(button));
@@ -137,7 +185,6 @@ void deleteServices(GtkWidget *widget, gpointer user_data)
     GtkWidget *entry = createSearch(box_entry);
     gtk_entry_set_placeholder_text(GTK_ENTRY(entry), "Nhập chính xác tên dịch vụ muốn xóa");
     gtk_entry_set_width_chars(GTK_ENTRY(entry), 80);
-    GtkWidget *find_button = createButton(box_entry, "Tìm");
 
     // Thiết lập cho box_information
     GtkWidget *grid = createGrid(box_information);
@@ -151,6 +198,12 @@ void deleteServices(GtkWidget *widget, gpointer user_data)
     gtk_grid_attach(GTK_GRID(grid), cost_label, 0, 2, 1, 1);
 
     // Xử lí lấy thông tin từ Liststore để hiển thị
+    FindIterOfSearch_service *findData = g_new(FindIterOfSearch_service, 1);
+    findData->list_store = data->store;
+    findData->search_column = 0;
+    findData->result_iter = g_new(GtkTreeIter, 1);  // cấp phát cho iter
+    findData->grid = grid;
+    g_signal_connect(entry, "changed", G_CALLBACK(search_in_liststore_service), findData);
 
     // Thiết lập cho box_delete
     GtkWidget *confirm_label = createLabel(box_delete, "Bạn có chắc chắn muốn xóa dịch vụ này?");
@@ -164,8 +217,13 @@ void deleteServices(GtkWidget *widget, gpointer user_data)
     gtk_widget_show_all(deleteServices_window);
 
     // Handle DELETE button
+    g_signal_connect(delete_button, "clicked", G_CALLBACK(on_delete_button_clicked), findData);
 
+    // Handel CANCEL button
     g_signal_connect_swapped(cancel_button, "clicked", G_CALLBACK(gtk_widget_destroy), deleteServices_window);
+
+    // Giải phóng FindIterOfSearch
+    g_signal_connect(deleteServices_window, "destroy", G_CALLBACK(free_memory_when_main_window_destroy), findData);
 }
 
 void editServices(GtkWidget *widget, gpointer user_data)
@@ -191,7 +249,6 @@ void editServices(GtkWidget *widget, gpointer user_data)
     GtkWidget *entry = createSearch(box_entry);
     gtk_entry_set_placeholder_text(GTK_ENTRY(entry), "Nhập chính xác tên dịch vụ muốn chỉnh sửa");
     gtk_entry_set_width_chars(GTK_ENTRY(entry), 80);
-    GtkWidget *find_button = createButton(box_entry, "Tìm");
 
     // Thiết lập cho box_information
     GtkWidget *grid = createGrid(box_information);
@@ -220,6 +277,15 @@ void editServices(GtkWidget *widget, gpointer user_data)
     gtk_widget_set_halign(cost_entry, GTK_ALIGN_FILL);
 
     // Xử lí lấy thông tin từ Liststore để hiển thị
+    FindIterOfSearch_service *findData = g_new(FindIterOfSearch_service, 1);
+    findData->list_store = data->store;
+    findData->search_column = 0;
+    findData->result_iter = g_new(GtkTreeIter, 1);  // cấp phát cho iter
+    findData->grid = grid;
+    findData->id_entry = id_entry;
+    findData->name_entry = name_entry;
+    findData->cost_entry = cost_entry;
+    g_signal_connect(entry, "changed", G_CALLBACK(search_in_liststore_service_edit), findData);
 
     // Thiết lập cho box_edit
     GtkWidget *confirm_label = createLabel(box_edit, "Bạn có chắc chắn muốn chỉnh sửa dịch vụ này?");
@@ -233,6 +299,11 @@ void editServices(GtkWidget *widget, gpointer user_data)
     gtk_widget_show_all(editServices_window);
 
     // Handle EDIT button
+    g_signal_connect(edit_button, "clicked", G_CALLBACK(on_edit_button_clicked), findData);
 
+    // Handel CANCEL button
     g_signal_connect_swapped(cancel_button, "clicked", G_CALLBACK(gtk_widget_destroy), editServices_window);
+
+    // Giải phóng FindIterOfSearch
+    g_signal_connect(editServices_window, "destroy", G_CALLBACK(free_memory_when_main_window_destroy), findData);
 }

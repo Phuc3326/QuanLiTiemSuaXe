@@ -3,7 +3,9 @@
 
 #include <gtk/gtk.h>
 
-void search_in_liststore_delete(GtkEntry *entry_search, gpointer findData);
-void search_in_liststore_edit(GtkEntry *entry_search, gpointer user_data);
+void search_in_liststore_customer(GtkEntry *entry_search, gpointer findData);
+void search_in_liststore_customer_edit(GtkEntry *entry_search, gpointer user_data);
+void search_in_liststore_service(GtkEntry *entry_search, gpointer findData);
+void search_in_liststore_service_edit(GtkEntry *entry_search, gpointer user_data);
 
 #endif

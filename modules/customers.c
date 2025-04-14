@@ -76,7 +76,7 @@ static void on_save_clicked(GtkButton *button, gpointer add_data) {
     gtk_widget_destroy(window);
 }
 
-void on_delete_button_clicked(GtkWidget *widget, gpointer user_data)
+static void on_delete_button_clicked(GtkWidget *widget, gpointer user_data)
 {
     FindIterOfSearch *data = (FindIterOfSearch *)user_data;
 
@@ -94,7 +94,7 @@ void on_delete_button_clicked(GtkWidget *widget, gpointer user_data)
     gtk_widget_destroy(window);
 }
 
-void on_edit_button_clicked(GtkButton *button, gpointer user_data) {
+static void on_edit_button_clicked(GtkButton *button, gpointer user_data) {
     FindIterOfSearch *data = (FindIterOfSearch *)user_data;
 
     // Lấy dữ liệu mới từ GtkEntry
@@ -239,7 +239,7 @@ void deleteCustomers(GtkWidget *widget, gpointer user_data)
     findData->search_column = 0;
     findData->result_iter = g_new(GtkTreeIter, 1);  // cấp phát cho iter
     findData->grid = grid;
-    g_signal_connect(entry, "changed", G_CALLBACK(search_in_liststore_delete), findData);
+    g_signal_connect(entry, "changed", G_CALLBACK(search_in_liststore_customer), findData);
 
     // Thiết lập cho box_delete
     GtkWidget *confirm_label = createLabel(box_delete, "Bạn có chắc chắn muốn xóa khách hàng này?");
@@ -334,7 +334,7 @@ void editCustomers(GtkWidget *widget, gpointer user_data)
     findData->numberphone_entry = numberphone_entry;
     findData->numberplate_entry = numberplate_entry;
     findData->cartype_entry = cartype_entry;
-    g_signal_connect(entry, "changed", G_CALLBACK(search_in_liststore_edit), findData);
+    g_signal_connect(entry, "changed", G_CALLBACK(search_in_liststore_customer_edit), findData);
 
     // Thiết lập cho box_edit
     GtkWidget *confirm_label = createLabel(box_edit, "Bạn có chắc chắn muốn chỉnh sửa khách hàng này?");
@@ -408,7 +408,7 @@ void historyCustomers(GtkWidget *widget, gpointer user_data)
     findData->search_column = 0;
     findData->result_iter = g_new(GtkTreeIter, 1);  // cấp phát cho iter
     findData->grid = grid;
-    g_signal_connect(entry, "changed", G_CALLBACK(search_in_liststore_delete), findData);
+    g_signal_connect(entry, "changed", G_CALLBACK(search_in_liststore_customer), findData);
 
     // Box lịch sử
     GtkWidget *box_history =gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
