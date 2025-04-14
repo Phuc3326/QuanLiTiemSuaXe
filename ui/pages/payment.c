@@ -111,8 +111,8 @@ static gboolean filter_visible_func(GtkTreeModel *model, GtkTreeIter *iter, gpoi
         return TRUE;
     }
 
-    // Get the billing id from column 3
-    gtk_tree_model_get(model, iter, 1, &billing_id, -1);
+    // Get the billing id from column 1
+    gtk_tree_model_get(model, iter, 0, &billing_id, -1);
 
     // Check if the plate number contains the search text
     if (billing_id != NULL)

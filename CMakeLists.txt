@@ -18,6 +18,7 @@ file(GLOB_RECURSE SRC_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/utils/get_last_iter.c
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/utils/search_in_model.c
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/utils/update_txt.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/ui/utils/update_txt_ser.c
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/components/scrolled.c
     ${CMAKE_CURRENT_SOURCE_DIR}/modules/*.c
     ${CMAKE_CURRENT_SOURCE_DIR}/modules/services.c
