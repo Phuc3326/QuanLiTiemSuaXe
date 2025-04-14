@@ -9,6 +9,8 @@
 #include "components/grid.h"
 #include "components/button.h"
 #include "components/scrolled.h"
+#include "../ui/utils/update_txt_ser.h"
+#include "../ui/utils/freeMemory.h"
 
 /**
  * Thêm dữ liệu vào list store
@@ -29,30 +31,7 @@ static void addData(GtkListStore *store, const char *filename, ...)
     va_end(args);
 
     // Thêm dữ liệu vào file services.txt
-    // Mở file
-    FILE *file_pointer = fopen(filename, "w");
-
-    // Nếu không mở được file thì thoát
-    if (!file_pointer) return;
-
-    // Lấy con trỏ đến hàng đầu tiên trong Listore
-    gboolean valid = gtk_tree_model_get_iter_first(GTK_TREE_MODEL(store), &iter);
-
-    // Lấy dữ liệu từ liststore rồi ghi file
-    while (valid)
-    {
-    const char *id, *name, *cost;
-    gtk_tree_model_get(GTK_TREE_MODEL(store), &iter,
-                        0, &id,
-                        1, &name,
-                        2, &cost,
-                        -1);
-    fprintf(file_pointer, "%s|%s|%s\n", id, name, cost);
-    valid = gtk_tree_model_iter_next(GTK_TREE_MODEL(store), &iter);
-    }
-
-    // Đóng file
-    fclose(file_pointer);
+    updateTXT_ser(store, filename);
 }
 
 static void on_save_clicked(GtkButton *button, gpointer add_data) {

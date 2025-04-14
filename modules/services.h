@@ -18,6 +18,18 @@ typedef struct {
     GtkListStore *store;
 } AddServiceData;
 
+typedef struct 
+{
+    GtkListStore *list_store;
+    gint search_column; 
+    GtkTreeIter *result_iter;
+    GtkWidget *grid;
+    // Các entry cần cho chức năng chỉnh sửa khách hàng
+    GtkWidget *id_entry;
+    GtkWidget *name_entry;
+    GtkWidget *cost_entry;
+} FindIterOfSearch_service;
+
 void addServices(GtkWidget *widget, gpointer user_data);
 static void addData(GtkListStore *store, const char *filename, ...);
 void deleteServices(GtkWidget *widget, gpointer user_data);

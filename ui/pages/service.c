@@ -110,8 +110,8 @@ static gboolean filter_visible_func(GtkTreeModel *model, GtkTreeIter *iter, gpoi
         return TRUE;
     }
 
-    // Get the service name from column 3
-    gtk_tree_model_get(model, iter, 2, &service_name, -1);
+    // Get the service name from column 2
+    gtk_tree_model_get(model, iter, 1, &service_name, -1);
 
     // Check if the service name contains the search text
     if (service_name != NULL)
