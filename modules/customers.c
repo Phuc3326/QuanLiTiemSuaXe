@@ -142,28 +142,28 @@ void addCustomers(GtkWidget *widget, gpointer user_data) {
     GtkWidget *grid = createGrid(addCustomers_window);
 
     // Tạo các label
-    //GtkWidget *id_label = gtk_label_new("Mã KH:");
+    // GtkWidget *id_label = gtk_label_new("Mã KH:");
     GtkWidget *name_label = gtk_label_new("Tên KH:");
     GtkWidget *numberphone_label = gtk_label_new("SĐT:");
     GtkWidget *numberplate_label = gtk_label_new("Biển số:");
     GtkWidget *cartype_label = gtk_label_new("Loại xe:");
 
     // Đặt các label vào grid
-    //gtk_grid_attach(GTK_GRID(grid), id_label, 0, 0, 1, 1);
+    // gtk_grid_attach(GTK_GRID(grid), id_label, 0, 0, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), name_label, 0, 1, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), numberphone_label, 0, 2, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), numberplate_label, 0, 3, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), cartype_label, 0, 4, 1, 1);
 
     // Tạo các entry
-    //GtkWidget *id_entry =  gtk_search_entry_new();
+    // GtkWidget *id_entry =  gtk_search_entry_new();
     GtkWidget *name_entry =  gtk_search_entry_new();
     GtkWidget *numberphone_entry =  gtk_search_entry_new();
     GtkWidget *numberplate_entry =  gtk_search_entry_new();
     GtkWidget *cartype_entry =  gtk_search_entry_new();
 
     // Đặt các entry vào grid
-    //gtk_grid_attach(GTK_GRID(grid), id_entry, 1, 0, 2, 1);
+    // gtk_grid_attach(GTK_GRID(grid), id_entry, 1, 0, 2, 1);
     gtk_grid_attach(GTK_GRID(grid), name_entry, 1, 1, 2, 1);
     gtk_grid_attach(GTK_GRID(grid), numberphone_entry, 1, 2, 2, 1);
     gtk_grid_attach(GTK_GRID(grid), numberplate_entry, 1, 3, 2, 1);
@@ -182,7 +182,7 @@ void addCustomers(GtkWidget *widget, gpointer user_data) {
 
     // Handle SAVE button
     AddCustomerData *add_data = g_new(AddCustomerData, 1);
-    //add_data->id_entry = id_entry;
+    // add_data->id_entry = id_entry;
     add_data->name_entry = name_entry;
     add_data->phone_entry = numberphone_entry;
     add_data->plate_entry = numberplate_entry;
