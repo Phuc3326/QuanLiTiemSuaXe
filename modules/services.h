@@ -8,6 +8,8 @@ typedef struct
 {
     GtkWidget *main_window;
     GtkListStore *store;
+    GtkListStore *customerList;
+    GtkListStore *billingList;
 } ServiceData;
 
 // Struct để truyền vào hàm on_save_clicked
@@ -28,6 +30,10 @@ typedef struct
     GtkWidget *id_entry;
     GtkWidget *name_entry;
     GtkWidget *cost_entry;
+    // Các label cần cho việc hiện thông tin trong các cửa sổ con
+    GtkWidget *id_label;       
+    GtkWidget *name_label;
+    GtkWidget *cost_label;
 } FindIterOfSearch_service;
 
 void addServices(GtkWidget *widget, gpointer user_data);

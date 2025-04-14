@@ -7,7 +7,10 @@
 typedef struct 
 {
     GtkWidget *main_window;
-    GtkListStore *store;
+    GtkListStore *store; // Liststore của customerList
+    GtkListStore *serviceList;
+    GtkListStore *billingList;
+
 } CustomerData;
 
 // Struct để truyền vào hàm on_save_clicked
@@ -32,6 +35,12 @@ typedef struct
     GtkWidget *numberphone_entry;
     GtkWidget *numberplate_entry;
     GtkWidget *cartype_entry;
+    // Các label cần cho việc hiện thông tin trong các cửa sổ con
+    GtkWidget *id_label;       
+    GtkWidget *name_label;
+    GtkWidget *numberphone_label;
+    GtkWidget *numberplate_label;
+    GtkWidget *cartype_label;
 } FindIterOfSearch;
 
 void addCustomers(GtkWidget *widget, gpointer user_data);

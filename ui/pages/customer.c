@@ -7,6 +7,7 @@
 #include "../utils/listStore.h"
 #include "../utils/freeMemory.h"
 #include "../../modules/customers.h"
+#include "../../model/model_central.h"
 
 // Hàm tải nội dung từ file text vào Liststore
 static void load_file_txt_to_liststore(GtkListStore *store, const char *filename) {
@@ -125,8 +126,10 @@ static gboolean filter_visible_func(GtkTreeModel *model, GtkTreeIter *iter, gpoi
     return visible;
 }
 
-GtkWidget *createCustomerPage(GtkWidget *notebook, GtkWidget *window)
+GtkWidget *createCustomerPage(GtkWidget *notebook, GtkWidget *window, gpointer d)
 {
+    modelCentral *data = (modelCentral *) d;
+
     GtkWidget *page;
     page = createPage(notebook, GTK_ORIENTATION_HORIZONTAL, 10, "Khách hàng");
 
@@ -149,14 +152,11 @@ GtkWidget *createCustomerPage(GtkWidget *notebook, GtkWidget *window)
     GtkWidget *listViewForPageKhachHang = createTreeView(page);
     const gchar *columnNames[] = {"Mã KH", "Tên KH", "SĐT", "Biển số", "Loại xe", NULL};
     createColumns(listViewForPageKhachHang, columnNames, 5);
-
-    // Khởi tạo model cho danh sách khách hàng
-    GtkListStore *customerList = createListStore(5, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
     
     // Tải dữ liệu file text vào Liststore khi khởi động chương trình
-    load_file_txt_to_liststore(customerList, "../database/customers.txt");
+    load_file_txt_to_liststore(data->customerList, "../database/customers.txt");
 
-    gtk_tree_view_set_model(GTK_TREE_VIEW(listViewForPageKhachHang), GTK_TREE_MODEL(customerList));
+    gtk_tree_view_set_model(GTK_TREE_VIEW(listViewForPageKhachHang), GTK_TREE_MODEL(data->customerList));
 
     // Handle search bar
     g_signal_connect(searchBarForPageKhachHang, "changed", G_CALLBACK(onSearchChanged), listViewForPageKhachHang);
@@ -164,7 +164,9 @@ GtkWidget *createCustomerPage(GtkWidget *notebook, GtkWidget *window)
     // Handle "Thêm khách hàng" button
     CustomerData *user_data = g_new(CustomerData, 1);
     user_data->main_window = window;
-    user_data->store = customerList;
+    user_data->store = data->customerList;
+    user_data->serviceList = data->serviceList;
+    user_data->billingList = data->billingList;
     g_signal_connect(buttonThemKhachHang, "clicked", G_CALLBACK(addCustomers), user_data);
 
     // Handle "Xóa khách hàng" button

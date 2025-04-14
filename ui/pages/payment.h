@@ -3,6 +3,6 @@
 
 #include <gtk/gtk.h>
 
-GtkWidget *createPaymentPage(GtkWidget *notebook, GtkWidget *window);
+GtkWidget *createPaymentPage(GtkWidget *notebook, GtkWidget *window, gpointer user_data);
 
 #endif

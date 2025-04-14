@@ -1,10 +1,13 @@
 #include <gtk/gtk.h>
 #include "ui.h"
 #include "components/notebook.h"
+#include "utils/listStore.h"
 #include "pages/customer.h"
 #include "pages/service.h"
 #include "pages/payment.h"
 #include "pages/statistical.h"
+#include "../model/model_central.h"
+#include "utils/freeMemory.h"
 
 /**
  * Tạo giao diện chính
@@ -13,10 +16,24 @@
 void createUI(GtkWidget *window)
 {
     GtkWidget *notebook = createNotebook(window);
-    createCustomerPage(notebook, window);
-    createServicePage(notebook, window);
-    createPaymentPage(notebook, window);
-    createStatisticalPage(notebook, window);
+
+    // Tạo Liststore cho các trang
+    modelCentral *data = g_new(modelCentral, 1);
+    GtkListStore *customerList = createListStore(5, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
+    GtkListStore *serviceList = createListStore(3, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
+    GtkListStore *billingList= createListStore(4, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
+    data->customerList = customerList;
+    data->serviceList = serviceList;
+    data->billingList = billingList;
+
+    // Tạo các page
+    createCustomerPage(notebook, window, data);
+    createServicePage(notebook, window, data);
+    createPaymentPage(notebook, window, data);
+    createStatisticalPage(notebook, window, data);
+
+    // Giải phóng modelCentral khi dừng chương trình
+    g_signal_connect(window, "destroy", G_CALLBACK(free_memory_when_main_window_destroy), data);
 }
 
 /**

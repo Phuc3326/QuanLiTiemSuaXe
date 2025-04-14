@@ -19,17 +19,34 @@ void display_customer_info(FindIterOfSearch *findData)
     gtk_tree_model_get(model, iter, 3, &numberplate_found, -1);
     gtk_tree_model_get(model, iter, 4, &cartype_found, -1);
 
-    GtkWidget *id = gtk_label_new(id_found);
-    GtkWidget *name = gtk_label_new(name_found);
-    GtkWidget *numberphone = gtk_label_new(numberphone_found);
-    GtkWidget *numberplate = gtk_label_new(numberplate_found);
-    GtkWidget *cartype = gtk_label_new(cartype_found);
+    // Nếu các label chưa được tạo, tạo mới và gắn vào grid
+    if (!data->id_label) {
+        data->id_label = gtk_label_new(id_found);
+        data->name_label = gtk_label_new(name_found);
+        data->numberphone_label = gtk_label_new(numberphone_found);
+        data->numberplate_label = gtk_label_new(numberplate_found);
+        data->cartype_label = gtk_label_new(cartype_found);
 
-    gtk_grid_attach(GTK_GRID(data->grid), id, 1, 0, 1, 1);
-    gtk_grid_attach(GTK_GRID(data->grid), name, 1, 1, 1, 1);
-    gtk_grid_attach(GTK_GRID(data->grid), numberphone, 1, 2, 1, 1);
-    gtk_grid_attach(GTK_GRID(data->grid), numberplate, 1, 3, 1, 1);
-    gtk_grid_attach(GTK_GRID(data->grid), cartype, 1, 4, 1, 1);
+        gtk_grid_attach(GTK_GRID(data->grid), data->id_label, 1, 0, 1, 1);
+        gtk_grid_attach(GTK_GRID(data->grid), data->name_label, 1, 1, 1, 1);
+        gtk_grid_attach(GTK_GRID(data->grid), data->numberphone_label, 1, 2, 1, 1);
+        gtk_grid_attach(GTK_GRID(data->grid), data->numberplate_label, 1, 3, 1, 1);
+        gtk_grid_attach(GTK_GRID(data->grid), data->cartype_label, 1, 4, 1, 1);
+    } else {
+        // Cập nhật nội dung của các label
+        gtk_label_set_text(GTK_LABEL(data->id_label), id_found);
+        gtk_label_set_text(GTK_LABEL(data->name_label), name_found);
+        gtk_label_set_text(GTK_LABEL(data->numberphone_label), numberphone_found);
+        gtk_label_set_text(GTK_LABEL(data->numberplate_label), numberplate_found);
+        gtk_label_set_text(GTK_LABEL(data->cartype_label), cartype_found);
+    }
+
+    // Giải phóng bộ nhớ
+    g_free(id_found);
+    g_free(name_found);
+    g_free(numberphone_found);
+    g_free(numberplate_found);
+    g_free(cartype_found);
 
     gtk_widget_show_all(data->grid);
 }
@@ -138,18 +155,33 @@ void display_service_info(FindIterOfSearch_service *findData)
     GtkTreeModel *model = GTK_TREE_MODEL(data->list_store);
     GtkTreeIter *iter = data->result_iter;
 
-    gchar *id_found, *name_found, *cost_found;
-    gtk_tree_model_get(model, iter, 0, &id_found, -1);
-    gtk_tree_model_get(model, iter, 1, &name_found, -1);
-    gtk_tree_model_get(model, iter, 2, &cost_found, -1);
+    // Kiểm tra các con trỏ cơ bản
+    if (!data || !model || !iter) {
+        g_warning("Dữ liệu hoặc iterator không hợp lệ");
+        return;
+    }
 
-    GtkWidget *id = gtk_label_new(id_found);
-    GtkWidget *name = gtk_label_new(name_found);
-    GtkWidget *cost = gtk_label_new(cost_found);
+    gchar *id_found = NULL, *name_found = NULL, *cost_found = NULL;
+    gtk_tree_model_get(model, iter, 0, &id_found, 1, &name_found, 2, &cost_found, -1);
 
-    gtk_grid_attach(GTK_GRID(data->grid), id, 1, 0, 1, 1);
-    gtk_grid_attach(GTK_GRID(data->grid), name, 1, 1, 1, 1);
-    gtk_grid_attach(GTK_GRID(data->grid), cost, 1, 2, 1, 1);
+    // Cập nhật hoặc tạo mới các nhãn
+    if (!data->id_label) {
+        data->id_label = gtk_label_new(id_found ? id_found : "");
+        data->name_label = gtk_label_new(name_found ? name_found : "");
+        data->cost_label = gtk_label_new(cost_found ? cost_found : "");
+
+        gtk_grid_attach(GTK_GRID(data->grid), data->id_label, 1, 0, 1, 1);
+        gtk_grid_attach(GTK_GRID(data->grid), data->name_label, 1, 1, 1, 1);
+        gtk_grid_attach(GTK_GRID(data->grid), data->cost_label, 1, 2, 1, 1);
+    } else {
+        gtk_label_set_text(GTK_LABEL(data->id_label), id_found ? id_found : "");
+        gtk_label_set_text(GTK_LABEL(data->name_label), name_found ? name_found : "");
+        gtk_label_set_text(GTK_LABEL(data->cost_label), cost_found ? cost_found : "");
+    }
+
+    g_free(id_found);
+    g_free(name_found);
+    g_free(cost_found);
 
     gtk_widget_show_all(data->grid);
 }
@@ -179,6 +211,13 @@ void search_in_liststore_service(GtkEntry *entry_search, gpointer findData)
 
             g_free(cell_text);
         } while (gtk_tree_model_iter_next(model, &iter));
+    }
+
+    // Không tìm thấy kết quả: xóa nội dung nhãn hoặc hiển thị thông báo
+    if (data->id_label) {
+        gtk_label_set_text(GTK_LABEL(data->id_label), "");
+        gtk_label_set_text(GTK_LABEL(data->name_label), "");
+        gtk_label_set_text(GTK_LABEL(data->cost_label), "");
     }
 }
 

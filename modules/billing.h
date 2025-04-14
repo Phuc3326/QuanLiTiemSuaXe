@@ -8,6 +8,8 @@ typedef struct
 {
     GtkWidget *main_window;
     GtkListStore *store;
+    GtkListStore *customerList;
+    GtkListStore *serviceList;
 } BillData;
 
 // Struct để truyền vào hàm on_create_clicked

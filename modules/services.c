@@ -181,9 +181,9 @@ void deleteServices(GtkWidget *widget, gpointer user_data)
     GtkWidget *box_delete = createBox(box_big, GTK_ORIENTATION_VERTICAL, 10); // Box chứa nút cancel và delete
 
     // Thiết lập cho box_entry
-    GtkWidget *label = createLabel(box_entry, "Nhập vào tên dịch vụ");
+    GtkWidget *label = createLabel(box_entry, "Nhập vào mã dịch vụ");
     GtkWidget *entry = createSearch(box_entry);
-    gtk_entry_set_placeholder_text(GTK_ENTRY(entry), "Nhập chính xác tên dịch vụ muốn xóa");
+    gtk_entry_set_placeholder_text(GTK_ENTRY(entry), "Nhập chính xác mã dịch vụ muốn xóa");
     gtk_entry_set_width_chars(GTK_ENTRY(entry), 80);
 
     // Thiết lập cho box_information
@@ -201,7 +201,7 @@ void deleteServices(GtkWidget *widget, gpointer user_data)
     FindIterOfSearch_service *findData = g_new(FindIterOfSearch_service, 1);
     findData->list_store = data->store;
     findData->search_column = 0;
-    findData->result_iter = g_new(GtkTreeIter, 1);  // cấp phát cho iter
+    findData->result_iter = g_new0(GtkTreeIter, 1); // Khởi tạo bằng 0
     findData->grid = grid;
     g_signal_connect(entry, "changed", G_CALLBACK(search_in_liststore_service), findData);
 
@@ -245,9 +245,9 @@ void editServices(GtkWidget *widget, gpointer user_data)
     GtkWidget *box_edit = createBox(box_big, GTK_ORIENTATION_VERTICAL, 10); // Box chứa nút cancel và edit
 
     // Thiết lập cho box_entry
-    GtkWidget *label = createLabel(box_entry, "Nhập vào tên dịch vụ:");
+    GtkWidget *label = createLabel(box_entry, "Nhập vào mã dịch vụ:");
     GtkWidget *entry = createSearch(box_entry);
-    gtk_entry_set_placeholder_text(GTK_ENTRY(entry), "Nhập chính xác tên dịch vụ muốn chỉnh sửa");
+    gtk_entry_set_placeholder_text(GTK_ENTRY(entry), "Nhập chính xác mã dịch vụ muốn chỉnh sửa");
     gtk_entry_set_width_chars(GTK_ENTRY(entry), 80);
 
     // Thiết lập cho box_information

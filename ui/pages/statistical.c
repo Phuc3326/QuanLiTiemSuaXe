@@ -19,7 +19,7 @@ enum {
  * @param notebook Notebook chứa trang thống kê
  * @return Trang thống kê
  */
-GtkWidget *createStatisticalPage(GtkWidget *notebook, GtkWidget *window)
+GtkWidget *createStatisticalPage(GtkWidget *notebook, GtkWidget *window, gpointer user_data)
 {
     // Tạo trang thống kê
     GtkWidget *page = createPage(notebook, GTK_ORIENTATION_VERTICAL, 10, "Thống kê & Báo cáo");
