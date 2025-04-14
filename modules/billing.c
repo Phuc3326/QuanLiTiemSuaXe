@@ -9,6 +9,8 @@
 #include "components/grid.h"
 #include "components/button.h"
 #include "components/scrolled.h"
+#include "../ui/utils/get_last_iter.h"
+#include "../ui/utils/update_txt_bil.h"
 
 /**
  * Thêm dữ liệu vào list store
@@ -29,44 +31,35 @@ static void addData(GtkListStore *store, const char *filename, ...)
     va_end(args);
 
     // Thêm dữ liệu vào file bills.txt
-    // Mở file
-    FILE *file_pointer = fopen(filename, "w");
-
-    // Nếu không mở được file thì thoát
-    if (!file_pointer) return;
-
-    // Lấy con trỏ đến hàng đầu tiên trong Listore
-    gboolean valid = gtk_tree_model_get_iter_first(GTK_TREE_MODEL(store), &iter);
-
-    // Lấy dữ liệu từ liststore rồi ghi file
-    while (valid)
-    {
-    const char *id, *time, *id_cus, *id_ser;
-    gtk_tree_model_get(GTK_TREE_MODEL(store), &iter,
-                        0, &id,
-                        1, &time,
-                        2, &id_cus,
-                        3, &id_ser,
-                        -1);
-    fprintf(file_pointer, "%s|%s|%s|%s\n", id, time, id_cus, id_ser);
-    valid = gtk_tree_model_iter_next(GTK_TREE_MODEL(store), &iter);
-    }
-
-    // Đóng file
-    fclose(file_pointer);
+    updateTXT_bil(store, filename);
 }
 
 static void on_create_clicked(GtkButton *button, gpointer add_data) {
     // Lấy các giá trị đã nhập
     AddBillData *data = (AddBillData *)add_data;
-    const gchar *id = gtk_entry_get_text(GTK_ENTRY(data->id_entry));
+    // Tạo id cho hóa đơn mới tạo
+        // Lấy id của hóa cuối cùng của Liststore
+        gchar *last_id;
+        GtkTreeIter last_iter; 
+        get_last_iter(GTK_TREE_MODEL(data->store), &last_iter);
+        gtk_tree_model_get(GTK_TREE_MODEL(data->store), &last_iter, 0, &last_id, -1);
+        // Tạo id mới nhất
+        const gchar *prefix = "B";
+        int number = atoi(last_id + strlen(prefix)); /* last_id là con trỏ tới id => +1 thì con trỏ sẽ dịch về sau 1 
+        phần tử => trỏ tới "00x". atoi là hàm biến chuỗi số thành số nguyên => lấy được 00x = x */ 
+        number++;
+        gchar new_id[10];
+        g_snprintf(new_id, sizeof(new_id), "%s%03d", prefix, number);
+
+    // Lấy các giá trị đã nhập
+    // const gchar *id = gtk_entry_get_text(GTK_ENTRY(data->id_entry));
     const gchar *time = gtk_entry_get_text(GTK_ENTRY(data->time_entry));
     const gchar *id_cus = gtk_entry_get_text(GTK_ENTRY(data->id_cus_entry));
     const gchar *id_ser = gtk_entry_get_text(GTK_ENTRY(data->id_ser_entry));
 
     // Thêm dữ liệu vào Liststore và vào file
     addData(data->store, "../database/bills.txt",
-        0, id,
+        0, new_id,
         1, time,
         2, id_cus,
         3, id_ser,
@@ -96,25 +89,25 @@ void addBill(GtkWidget *widget, gpointer user_data) {
     GtkWidget *grid = createGrid(addBill_window);
 
     // Tạo các label
-    GtkWidget *id_billing = gtk_label_new("Mã hóa đơn");
+    // GtkWidget *id_billing = gtk_label_new("Mã hóa đơn");
     GtkWidget *time_billing = gtk_label_new("Thời gian");
     GtkWidget *id_customers = gtk_label_new("Mã KH:");
     GtkWidget *id_services = gtk_label_new("Mã DV:");
 
     // Đặt các label vào grid
-    gtk_grid_attach(GTK_GRID(grid), id_billing, 0, 0, 1, 1);
+    // gtk_grid_attach(GTK_GRID(grid), id_billing, 0, 0, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), time_billing, 0, 1, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), id_customers, 0, 2, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), id_services, 0, 3, 1, 1);
 
     // Tạo các entry
-    GtkWidget *id_bil_entry =  gtk_search_entry_new();
+    // GtkWidget *id_bil_entry =  gtk_search_entry_new();
     GtkWidget *time_entry =  gtk_search_entry_new();
     GtkWidget *id_cus_entry =  gtk_search_entry_new();
     GtkWidget *id_ser_entry =  gtk_search_entry_new();
 
     // Đặt các entry vào grid
-    gtk_grid_attach(GTK_GRID(grid), id_bil_entry, 1, 0, 2, 1);
+    // gtk_grid_attach(GTK_GRID(grid), id_bil_entry, 1, 0, 2, 1);
     gtk_grid_attach(GTK_GRID(grid), time_entry, 1, 1, 2, 1);
     gtk_grid_attach(GTK_GRID(grid), id_cus_entry, 1, 2, 2, 1);
     gtk_grid_attach(GTK_GRID(grid), id_ser_entry, 1, 3, 2, 1);
@@ -132,7 +125,7 @@ void addBill(GtkWidget *widget, gpointer user_data) {
 
     // Handle CREATE button
     AddBillData *add_data = g_new(AddBillData, 1);
-    add_data->id_entry = id_bil_entry;
+    // add_data->id_entry = id_bil_entry;
     add_data->time_entry = time_entry;
     add_data->id_cus_entry = id_cus_entry;
     add_data->id_ser_entry = id_ser_entry;
@@ -166,7 +159,6 @@ void exportBill(GtkWidget *widget, gpointer user_data)
     GtkWidget *entry = createSearch(box_entry);
     gtk_entry_set_placeholder_text(GTK_ENTRY(entry), "Nhập chính xác mã hóa đơn muốn xuất");
     gtk_entry_set_width_chars(GTK_ENTRY(entry), 80);
-    GtkWidget *find_button = createButton(box_entry, "Tìm");
 
     // Thiết lập cho box_information
     // box_information gồm một grid bên trái hiện thông tin khách hàng và grid bên phải hiện thông tin thanh toán
@@ -221,6 +213,7 @@ void exportBill(GtkWidget *widget, gpointer user_data)
     // Hiển thị cửa sổ con
     gtk_widget_show_all(exportBill_window);
 
+    // Handle BACK button
     g_signal_connect_swapped(back_button, "clicked", G_CALLBACK(gtk_widget_destroy), exportBill_window);
 
     // Handle "EXPORT BILL" button
