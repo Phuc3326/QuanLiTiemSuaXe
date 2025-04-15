@@ -198,10 +198,10 @@ void deleteServices(GtkWidget *widget, gpointer user_data)
     gtk_grid_attach(GTK_GRID(grid), cost_label, 0, 2, 1, 1);
 
     // Xử lí lấy thông tin từ Liststore để hiển thị
-    FindIterOfSearch_service *findData = g_new(FindIterOfSearch_service, 1);
+    FindIterOfSearch_service *findData = g_new0(FindIterOfSearch_service, 1);
     findData->list_store = data->store;
     findData->search_column = 0;
-    findData->result_iter = g_new0(GtkTreeIter, 1); // Khởi tạo bằng 0
+    findData->result_iter = g_new0(GtkTreeIter, 1);
     findData->grid = grid;
     g_signal_connect(entry, "changed", G_CALLBACK(search_in_liststore_service), findData);
 
