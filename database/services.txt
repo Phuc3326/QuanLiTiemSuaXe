@@ -1,3 +1,30 @@
 001|Sửa xe|100000
 002|Bơm bánh xe|5000
 003|Vá bánh xe|40000
+004|Thay nhớt|80000
+005|Vệ sinh xe|50000
+006|Thay lốp|250000
+007|Cân chỉnh lốp|60000
+008|Thay phanh|120000
+009|Thay bugi|45000
+010|Sửa phun xăng|180000
+011|Thay bình ắc quy|350000
+012|Vệ sinh bộ lọc gió|40000
+013|Thay dây curoa|150000
+014|Kiểm tra động cơ|90000
+015|Sửa hệ thống điện|110000
+016|Thay gương chiếu hậu|75000
+017|Thay đèn pha|95000
+018|Sửa pô xe|130000
+019|Bảo dưỡng định kỳ|300000
+020|Nạp gas điều hòa|220000
+021|Thay bộ đề|280000
+022|Sửa bộ ly hợp|170000
+023|Thay bộ chế hòa khí|190000
+024|Vệ sinh kim phun|85000
+025|Thay bộ lọc nhớt|55000
+026|Sửa hệ thống treo|160000
+027|Thay bộ phận giảm xóc|210000
+028|Kiểm tra hệ thống phun xăng|140000
+029|Thay bộ lọc nhiên liệu|65000
+030|Sửa hệ thống khởi động|125000

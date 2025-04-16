@@ -8,6 +8,7 @@
 #include "pages/statistical.h"
 #include "../model/model_central.h"
 #include "utils/freeMemory.h"
+#include "pages/customer.h"
 
 /**
  * Tạo giao diện chính
@@ -22,6 +23,10 @@ void createUI(GtkWidget *window)
     GtkListStore *customerList = createListStore(5, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
     GtkListStore *serviceList = createListStore(3, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
     GtkListStore *billingList= createListStore(4, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
+    // Tải dữ liệu file text vào Listdata->custostore khi khởi động chương trình
+    load_file_customer_txt_to_liststore(customerList, "../database/customers.txt");
+    load_file_service_txt_to_liststore(serviceList, "../database/services.txt");
+    load_file_billing_txt_to_liststore(billingList, "../database/bills.txt");
     data->customerList = customerList;
     data->serviceList = serviceList;
     data->billingList = billingList;

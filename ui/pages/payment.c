@@ -10,7 +10,7 @@
 #include "../../model/model_central.h"
 
 // Hàm tải nội dung từ file text vào Liststore
-static void load_file_txt_to_liststore(GtkListStore *store, const char *filename) {
+void load_file_billing_txt_to_liststore(GtkListStore *store, const char *filename) {
     
     // Mở file
     FILE *file = fopen(filename, "r");
@@ -149,9 +149,6 @@ GtkWidget *createPaymentPage(GtkWidget *notebook, GtkWidget *window, gpointer d)
     GtkWidget *listViewForPageHoaDon = createTreeView(page);
     const gchar *columnNames[] = {"Mã hóa đơn", "Thời gian", "Mã KH", "Mã DV", NULL};
     createColumns(listViewForPageHoaDon, columnNames, 4);
-    
-    // Tải dữ liệu file text vào Liststore khi khởi động chương trình
-    load_file_txt_to_liststore(data->billingList, "../database/bills.txt");
 
     gtk_tree_view_set_model(GTK_TREE_VIEW(listViewForPageHoaDon), GTK_TREE_MODEL(data->billingList));
 
