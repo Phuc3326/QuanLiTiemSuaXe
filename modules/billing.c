@@ -220,15 +220,12 @@ void exportBill(GtkWidget *widget, gpointer user_data)
     // Thiết lập box_export
     gtk_widget_set_halign(box_export, GTK_ALIGN_CENTER); // Căn giữa theo chiều ngang
     GtkWidget *back_button = createButton(box_export, "BACK");
-    GtkWidget *export_button = createButton(box_export, "EXPORT BILL");
 
     // Hiển thị cửa sổ con
     gtk_widget_show_all(exportBill_window);
 
     // Handle BACK button
     g_signal_connect_swapped(back_button, "clicked", G_CALLBACK(gtk_widget_destroy), exportBill_window);
-
-    // Handle "EXPORT BILL" button
 
     // Giải phóng struct
     g_signal_connect(exportBill_window, "destroy", G_CALLBACK(free_struct_and_iter_billing), findData);
