@@ -7,9 +7,10 @@
 #include "../utils/listStore.h"
 #include "../utils/freeMemory.h"
 #include "../../modules/billing.h"
+#include "../../model/model_central.h"
 
 // Hàm tải nội dung từ file text vào Liststore
-static void load_file_txt_to_liststore(GtkListStore *store, const char *filename) {
+void load_file_billing_txt_to_liststore(GtkListStore *store, const char *filename) {
     
     // Mở file
     FILE *file = fopen(filename, "r");
@@ -102,7 +103,7 @@ static gboolean filter_visible_func(GtkTreeModel *model, GtkTreeIter *iter, gpoi
 {
     GtkTreeModelFilter *filter_model = GTK_TREE_MODEL_FILTER(data);
     const gchar *search_text = g_object_get_data(G_OBJECT(filter_model), "search-text");
-    gchar *billing_id;
+    gchar *time;
     gboolean visible = TRUE;
 
     // If search text is empty, show all rows
@@ -111,21 +112,23 @@ static gboolean filter_visible_func(GtkTreeModel *model, GtkTreeIter *iter, gpoi
         return TRUE;
     }
 
-    // Get the billing id from column 1
-    gtk_tree_model_get(model, iter, 0, &billing_id, -1);
+    // Get the time from column 2
+    gtk_tree_model_get(model, iter, 1, &time, -1);
 
-    // Check if the plate number contains the search text
-    if (billing_id != NULL)
+    // Check if the time contains the search text
+    if (time != NULL)
     {
-        visible = (g_strstr_len(billing_id, -1, search_text) != NULL);
-        g_free(billing_id);
+        visible = (g_strstr_len(time, -1, search_text) != NULL);
+        g_free(time);
     }
 
     return visible;
 }
 
-GtkWidget *createPaymentPage(GtkWidget *notebook, GtkWidget *window)
+GtkWidget *createPaymentPage(GtkWidget *notebook, GtkWidget *window, gpointer d)
 {
+    modelCentral *data = (modelCentral *) d;
+
     GtkWidget *page;
     page = createPage(notebook, GTK_ORIENTATION_HORIZONTAL, 10, "Hóa Đơn");
 
@@ -136,24 +139,26 @@ GtkWidget *createPaymentPage(GtkWidget *notebook, GtkWidget *window)
 
     GtkWidget *searchBoxForPageHoaDon = createBox(menuBoxForPageHoaDon, GTK_ORIENTATION_HORIZONTAL, 10);
     GtkWidget *searchBarForPageHoaDon = createSearch(searchBoxForPageHoaDon);
-    gtk_entry_set_placeholder_text(GTK_ENTRY(searchBarForPageHoaDon), "Tìm kiếm theo mã khách hàng");
+    gtk_entry_set_placeholder_text(GTK_ENTRY(searchBarForPageHoaDon), "Tìm kiếm theo thời gian");
     gtk_widget_set_size_request(searchBarForPageHoaDon, 300, -1);
 
     GtkWidget *buttonTaoHoaDon = createButton(menuBoxForPageHoaDon, "Tạo hóa đơn");
     GtkWidget *buttonXuatHoaDon = createButton(menuBoxForPageHoaDon, "Xuất hóa đơn");
 
     // Hiển thị danh sách hóa đơn
-    GtkWidget *listViewForPageHoaDon = createTreeView(page);
+
+    GtkWidget *scrolled_window = gtk_scrolled_window_new(NULL, NULL);
+
+    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window),
+                                GTK_POLICY_NEVER,
+                                GTK_POLICY_ALWAYS);
+    gtk_container_add(GTK_CONTAINER(page), scrolled_window);
+
+    GtkWidget *listViewForPageHoaDon = createTreeView(scrolled_window);
     const gchar *columnNames[] = {"Mã hóa đơn", "Thời gian", "Mã KH", "Mã DV", NULL};
     createColumns(listViewForPageHoaDon, columnNames, 4);
 
-    // Khởi tạo model cho danh sách hóa đơn
-    GtkListStore *billingList = createListStore(4, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
-    
-    // Tải dữ liệu file text vào Liststore khi khởi động chương trình
-    load_file_txt_to_liststore(billingList, "../database/bills.txt");
-
-    gtk_tree_view_set_model(GTK_TREE_VIEW(listViewForPageHoaDon), GTK_TREE_MODEL(billingList));
+    gtk_tree_view_set_model(GTK_TREE_VIEW(listViewForPageHoaDon), GTK_TREE_MODEL(data->billingList));
 
     // Handle search bar
     g_signal_connect(searchBarForPageHoaDon, "changed", G_CALLBACK(onSearchChanged), listViewForPageHoaDon);
@@ -161,7 +166,9 @@ GtkWidget *createPaymentPage(GtkWidget *notebook, GtkWidget *window)
     // Handle "Tạo hóa đơn" button
     BillData *user_data = g_new(BillData, 1);
     user_data->main_window = window;
-    user_data->store = billingList;
+    user_data->store = data->billingList;
+    user_data->customerList = data->customerList;
+    user_data->serviceList = data->serviceList;
     g_signal_connect(buttonTaoHoaDon, "clicked", G_CALLBACK(addBill), user_data);
 
     // Handle "Xuất hóa đơn" button

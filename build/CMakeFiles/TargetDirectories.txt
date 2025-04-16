@@ -1,0 +1,3 @@
+C:/msys64/home/Dell/Project/QuanLiTiemSuaXe/build/CMakeFiles/app.dir
+C:/msys64/home/Dell/Project/QuanLiTiemSuaXe/build/CMakeFiles/edit_cache.dir
+C:/msys64/home/Dell/Project/QuanLiTiemSuaXe/build/CMakeFiles/rebuild_cache.dir

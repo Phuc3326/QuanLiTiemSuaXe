@@ -11,6 +11,8 @@
 #include "components/scrolled.h"
 #include "../ui/utils/get_last_iter.h"
 #include "../ui/utils/update_txt_bil.h"
+#include "../ui/utils/search_in_model.h"
+#include "../ui/utils/freeMemory.h"
 
 /**
  * Thêm dữ liệu vào list store
@@ -184,7 +186,15 @@ void exportBill(GtkWidget *widget, gpointer user_data)
     gtk_grid_attach(GTK_GRID(grid), cartype_label, 0, 5, 1, 1);
 
     // Xử lí lấy thông tin từ Liststore để hiển thị
-    
+    FindIterOfSearch_billing *findData = g_new0(FindIterOfSearch_billing, 1);
+    findData->list_store = data->store;
+    findData->customerList = data->customerList;
+    findData->serviceList = data->serviceList;
+    findData->search_column = 0;
+    findData->result_iter = g_new(GtkTreeIter, 1);  // cấp phát cho iter
+    findData->grid = grid;
+    g_signal_connect(entry, "changed", G_CALLBACK(search_billingList_for_customer), findData);
+
     // Grid thanh toán
     GtkWidget *grid_pay = gtk_grid_new();
     gtk_grid_set_column_spacing(GTK_GRID(grid_pay), 10);
@@ -204,11 +214,12 @@ void exportBill(GtkWidget *widget, gpointer user_data)
     gtk_grid_attach(GTK_GRID(grid_pay), time, 0, 4, 1, 1);
 
     // Xử lí lấy thông tin từ Liststore để hiển thị
+    findData->grid_pay = grid_pay;
+    g_signal_connect(entry, "changed", G_CALLBACK(search_billingList_for_service), findData);
 
     // Thiết lập box_export
     gtk_widget_set_halign(box_export, GTK_ALIGN_CENTER); // Căn giữa theo chiều ngang
     GtkWidget *back_button = createButton(box_export, "BACK");
-    GtkWidget *export_button = createButton(box_export, "EXPORT BILL");
 
     // Hiển thị cửa sổ con
     gtk_widget_show_all(exportBill_window);
@@ -216,5 +227,6 @@ void exportBill(GtkWidget *widget, gpointer user_data)
     // Handle BACK button
     g_signal_connect_swapped(back_button, "clicked", G_CALLBACK(gtk_widget_destroy), exportBill_window);
 
-    // Handle "EXPORT BILL" button
+    // Giải phóng struct
+    g_signal_connect(exportBill_window, "destroy", G_CALLBACK(free_struct_and_iter_billing), findData);
 }

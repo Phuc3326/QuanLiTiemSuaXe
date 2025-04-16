@@ -14,6 +14,97 @@
 #include "../ui/utils/freeMemory.h"
 #include "../ui/utils/update_txt.h"
 
+void clear_grid_history(GtkGrid *grid_history) {
+    GList *children = gtk_container_get_children(GTK_CONTAINER(grid_history));
+    GList *l;
+
+    for (l = children; l != NULL; l = l->next) {
+        GtkWidget *widget = GTK_WIDGET(l->data);
+
+        // Nếu widget nằm ở dòng >= 1 (giả định tiêu đề ở dòng 0), ta cần gán thêm thông tin row khi thêm widget
+        // Dùng gtk_widget_get_name() để kiểm tra
+        const gchar *name = gtk_widget_get_name(widget);
+        if (g_strcmp0(name, "title") != 0) {
+            gtk_widget_destroy(widget);
+        }
+    }
+
+    g_list_free(children);
+}
+
+void search_customer_history(GtkEntry *entry, gpointer user_data)
+{
+    HistoryData *h_data = (HistoryData *)user_data;
+
+    const gchar *customer_id = gtk_entry_get_text(entry);
+    if (strlen(customer_id) == 0) {
+        clear_grid_history(h_data->grid_history);
+        return;
+    }
+
+    // Xóa toàn bộ dữ liệu cũ trong grid_history (ngoại trừ tiêu đề)
+    clear_grid_history(h_data->grid_history);
+
+    GtkTreeIter iter;
+    gboolean valid = gtk_tree_model_get_iter_first(GTK_TREE_MODEL(h_data->billingList), &iter);
+    int row = 1;
+
+    while (valid) {
+        gchar *bill_id, *time, *cus_id, *service_id;
+        gtk_tree_model_get(GTK_TREE_MODEL(h_data->billingList), &iter,
+                           0, &bill_id,
+                           1, &time,
+                           2, &cus_id,
+                           3, &service_id,
+                           -1);
+
+        if (g_strcmp0(customer_id, cus_id) == 0) {
+            // Tìm tên dịch vụ và giá từ serviceList
+            gchar *service_name = NULL;
+            gchar *cost = NULL;
+
+            GtkTreeIter service_iter;
+            gboolean found = gtk_tree_model_get_iter_first(GTK_TREE_MODEL(h_data->serviceList), &service_iter);
+            while (found) {
+                gchar *sid;
+                gtk_tree_model_get(GTK_TREE_MODEL(h_data->serviceList), &service_iter, 0, &sid, -1);
+                if (g_strcmp0(sid, service_id) == 0) {
+                    gtk_tree_model_get(GTK_TREE_MODEL(h_data->serviceList), &service_iter,
+                                       1, &service_name,
+                                       2, &cost,
+                                       -1);
+                    g_free(sid);
+                    break;
+                }
+                g_free(sid);
+                found = gtk_tree_model_iter_next(GTK_TREE_MODEL(h_data->serviceList), &service_iter);
+            }
+
+            // Thêm dòng vào grid_history
+            GtkWidget *label_time = gtk_label_new(time);
+            GtkWidget *label_service = gtk_label_new(service_name ? service_name : "Không rõ");
+            GtkWidget *label_cost = gtk_label_new(cost ? cost : "N/A");
+
+            gtk_grid_attach(GTK_GRID(h_data->grid_history), label_time, 0, row, 1, 1);
+            gtk_grid_attach(GTK_GRID(h_data->grid_history), label_service, 1, row, 1, 1);
+            gtk_grid_attach(GTK_GRID(h_data->grid_history), label_cost, 2, row, 1, 1);
+            row++;
+
+            g_free(service_name);
+            g_free(cost);
+        }
+
+        g_free(bill_id);
+        g_free(time);
+        g_free(cus_id);
+        g_free(service_id);
+
+        valid = gtk_tree_model_iter_next(GTK_TREE_MODEL(h_data->billingList), &iter);
+    }
+
+    gtk_widget_show_all(GTK_WIDGET(h_data->grid_history));
+}
+
 /**
  * Thêm dữ liệu vào list store
  * @param store List store
@@ -259,7 +350,7 @@ void deleteCustomers(GtkWidget *widget, gpointer user_data)
     g_signal_connect_swapped(cancel_button, "clicked", G_CALLBACK(gtk_widget_destroy), deleteCustomers_window);
 
     // Giải phóng FindIterOfSearch
-    g_signal_connect(deleteCustomers_window, "destroy", G_CALLBACK(free_memory_when_main_window_destroy), findData);
+    g_signal_connect(deleteCustomers_window, "destroy", G_CALLBACK(free_struct_and_iter_customer), findData);
 }
 
 void editCustomers(GtkWidget *widget, gpointer user_data)
@@ -354,7 +445,7 @@ void editCustomers(GtkWidget *widget, gpointer user_data)
     g_signal_connect_swapped(cancel_button, "clicked", G_CALLBACK(gtk_widget_destroy), editCustomers_window);
 
     // Giải phóng FindIterOfSearch
-    g_signal_connect(editCustomers_window, "destroy", G_CALLBACK(free_memory_when_main_window_destroy), findData);
+    g_signal_connect(editCustomers_window, "destroy", G_CALLBACK(free_struct_and_iter_customer), findData);
 }
 
 void historyCustomers(GtkWidget *widget, gpointer user_data)
@@ -403,7 +494,7 @@ void historyCustomers(GtkWidget *widget, gpointer user_data)
     gtk_grid_attach(GTK_GRID(grid), cartype_label, 0, 4, 1, 1);
 
     // Xử lí lấy thông tin từ Liststore để hiển thị
-    FindIterOfSearch *findData = g_new(FindIterOfSearch, 1);
+    FindIterOfSearch *findData = g_new0(FindIterOfSearch, 1);
     findData->list_store = data->store;
     findData->search_column = 0;
     findData->result_iter = g_new(GtkTreeIter, 1);  // cấp phát cho iter
@@ -423,6 +514,9 @@ void historyCustomers(GtkWidget *widget, gpointer user_data)
     GtkWidget *time_label = gtk_label_new("Thời gian");
     GtkWidget *service_label = gtk_label_new("Dịch vụ");
     GtkWidget *cost_label = gtk_label_new("Giá");
+    gtk_widget_set_name(time_label, "title");
+    gtk_widget_set_name(service_label, "title");
+    gtk_widget_set_name(cost_label, "title");
 
     gtk_grid_attach(GTK_GRID(grid_history), time_label, 0, 0, 1, 1);
     gtk_grid_attach(GTK_GRID(grid_history), service_label, 1, 0, 1, 1);
@@ -432,6 +526,12 @@ void historyCustomers(GtkWidget *widget, gpointer user_data)
     GtkWidget *scrolled = createScrolled(box_history, grid_history);
 
     // Xử lí lấy lịch sử từ Liststore của tab service và tab hóa đơn
+    HistoryData *history_data = g_new(HistoryData, 1);
+    history_data->billingList = data->billingList;
+    history_data->serviceList = data->serviceList;
+    history_data->grid_history = GTK_GRID(grid_history);
+    history_data->entry = entry;
+    g_signal_connect(entry, "changed", G_CALLBACK(search_customer_history), history_data);
 
     // Thiết lập box_back
     gtk_widget_set_halign(box_back, GTK_ALIGN_CENTER); // Căn giữa theo chiều ngang
@@ -443,6 +543,7 @@ void historyCustomers(GtkWidget *widget, gpointer user_data)
     // Handle BACK button
     g_signal_connect_swapped(back_button, "clicked", G_CALLBACK(gtk_widget_destroy), historyCustomers_window);
 
-    // Giải phóng FindIterOfSearch
-    g_signal_connect(historyCustomers_window, "destroy", G_CALLBACK(free_memory_when_main_window_destroy), findData);
+    // Giải phóng bộ nhớ cho các struct khi tắt cửa sổ con
+    g_signal_connect(historyCustomers_window, "destroy", G_CALLBACK(free_struct_and_iter_customer), findData);
+    g_signal_connect(historyCustomers_window, "destroy", G_CALLBACK(free_memory_when_main_window_destroy), history_data);
 }

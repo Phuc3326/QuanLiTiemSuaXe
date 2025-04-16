@@ -7,9 +7,10 @@
 #include "../utils/listStore.h"
 #include "../utils/freeMemory.h"
 #include "../../modules/services.h"
+#include "../../model/model_central.h"
 
 // Hàm tải nội dung từ file text vào Liststore
-static void load_file_txt_to_liststore(GtkListStore *store, const char *filename) {
+void load_file_service_txt_to_liststore(GtkListStore *store, const char *filename) {
     
     // Mở file
     FILE *file = fopen(filename, "r");
@@ -123,8 +124,10 @@ static gboolean filter_visible_func(GtkTreeModel *model, GtkTreeIter *iter, gpoi
     return visible;
 }
 
-GtkWidget *createServicePage(GtkWidget *notebook, GtkWidget *window)
+GtkWidget *createServicePage(GtkWidget *notebook, GtkWidget *window, gpointer user_data)
 {
+    modelCentral *data = (modelCentral *) user_data;
+
     GtkWidget *page;
     page = createPage(notebook, GTK_ORIENTATION_HORIZONTAL, 10, "Dịch vụ");
 
@@ -143,17 +146,19 @@ GtkWidget *createServicePage(GtkWidget *notebook, GtkWidget *window)
     GtkWidget *buttonSuaDichVu = createButton(menuBoxForPageDichVu, "Sửa dịch vụ");
 
     // Hiển thị danh sách khách hàng
-    GtkWidget *listViewForPageDichVu = createTreeView(page);
+
+    GtkWidget *scrolled_window = gtk_scrolled_window_new(NULL, NULL);
+
+    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window),
+                                GTK_POLICY_NEVER,
+                                GTK_POLICY_ALWAYS);
+    gtk_container_add(GTK_CONTAINER(page), scrolled_window);
+
+    GtkWidget *listViewForPageDichVu = createTreeView(scrolled_window);
     const gchar *columnNames[] = {"Mã DV", "Tên dịch vụ", "Giá"};
     createColumns(listViewForPageDichVu, columnNames, 3);
 
-    // Khởi tạo model cho danh sách khách hàng
-    GtkListStore *serviceList = createListStore(3, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
-    
-    // Tải dữ liệu file text vào Liststore khi khởi động chương trình
-    load_file_txt_to_liststore(serviceList, "../database/services.txt");
-
-    gtk_tree_view_set_model(GTK_TREE_VIEW(listViewForPageDichVu), GTK_TREE_MODEL(serviceList));
+    gtk_tree_view_set_model(GTK_TREE_VIEW(listViewForPageDichVu), GTK_TREE_MODEL(data->serviceList));
 
     // Handle search bar
     g_signal_connect(searchBarForPageDichVu, "search-changed", G_CALLBACK(onSearchChanged), listViewForPageDichVu);
@@ -161,7 +166,9 @@ GtkWidget *createServicePage(GtkWidget *notebook, GtkWidget *window)
     // Handle "Thêm dịch vụ" button
     ServiceData *service_data = g_new(ServiceData, 1);
     service_data->main_window = window;
-    service_data->store = serviceList;
+    service_data->store = data->serviceList;
+    service_data->customerList = data->customerList;
+    service_data->billingList = data->billingList;
     g_signal_connect(buttonThemDichVu, "clicked", G_CALLBACK(addServices), service_data);
 
     // Handle "Xóa dịch vụ" button
