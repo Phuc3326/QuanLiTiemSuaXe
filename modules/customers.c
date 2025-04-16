@@ -21,28 +21,36 @@ typedef struct {
     GtkWidget *entry;
 } HistoryData;
 
+void clear_grid_history(GtkGrid *grid_history) {
+    GList *children = gtk_container_get_children(GTK_CONTAINER(grid_history));
+    GList *l;
+
+    for (l = children; l != NULL; l = l->next) {
+        GtkWidget *widget = GTK_WIDGET(l->data);
+
+        // Nếu widget nằm ở dòng >= 1 (giả định tiêu đề ở dòng 0), ta cần gán thêm thông tin row khi thêm widget
+        // Dùng gtk_widget_get_name() để kiểm tra
+        const gchar *name = gtk_widget_get_name(widget);
+        if (g_strcmp0(name, "title") != 0) {
+            gtk_widget_destroy(widget);
+        }
+    }
+
+    g_list_free(children);
+}
+
 void search_customer_history(GtkEntry *entry, gpointer user_data)
 {
     HistoryData *h_data = (HistoryData *)user_data;
 
     const gchar *customer_id = gtk_entry_get_text(entry);
-    if (strlen(customer_id) == 0) return;
-
-    // Xóa các dòng cũ trong grid_history (chỉ giữ hàng tiêu đề)
-    GList *children = gtk_container_get_children(GTK_CONTAINER(h_data->grid_history));
-    GList *l;
-
-    int index = 0;
-    for (l = children; l != NULL; l = l->next) 
-    {
-        if (index >= 3) 
-        { 
-            // bỏ qua 3 widget đầu tiên (label tiêu đề)
-            gtk_widget_destroy(GTK_WIDGET(l->data));
-        }
-        index++;
+    if (strlen(customer_id) == 0) {
+        clear_grid_history(h_data->grid_history);
+        return;
     }
-    g_list_free(children);
+
+    // Xóa toàn bộ dữ liệu cũ trong grid_history (ngoại trừ tiêu đề)
+    clear_grid_history(h_data->grid_history);
 
     GtkTreeIter iter;
     gboolean valid = gtk_tree_model_get_iter_first(GTK_TREE_MODEL(h_data->billingList), &iter);
@@ -349,7 +357,7 @@ void deleteCustomers(GtkWidget *widget, gpointer user_data)
     g_signal_connect_swapped(cancel_button, "clicked", G_CALLBACK(gtk_widget_destroy), deleteCustomers_window);
 
     // Giải phóng FindIterOfSearch
-    g_signal_connect(deleteCustomers_window, "destroy", G_CALLBACK(free_memory_when_main_window_destroy), findData);
+    g_signal_connect(deleteCustomers_window, "destroy", G_CALLBACK(free_struct_and_iter_customer), findData);
 }
 
 void editCustomers(GtkWidget *widget, gpointer user_data)
@@ -444,7 +452,7 @@ void editCustomers(GtkWidget *widget, gpointer user_data)
     g_signal_connect_swapped(cancel_button, "clicked", G_CALLBACK(gtk_widget_destroy), editCustomers_window);
 
     // Giải phóng FindIterOfSearch
-    g_signal_connect(editCustomers_window, "destroy", G_CALLBACK(free_memory_when_main_window_destroy), findData);
+    g_signal_connect(editCustomers_window, "destroy", G_CALLBACK(free_struct_and_iter_customer), findData);
 }
 
 void historyCustomers(GtkWidget *widget, gpointer user_data)
@@ -493,7 +501,7 @@ void historyCustomers(GtkWidget *widget, gpointer user_data)
     gtk_grid_attach(GTK_GRID(grid), cartype_label, 0, 4, 1, 1);
 
     // Xử lí lấy thông tin từ Liststore để hiển thị
-    FindIterOfSearch *findData = g_new(FindIterOfSearch, 1);
+    FindIterOfSearch *findData = g_new0(FindIterOfSearch, 1);
     findData->list_store = data->store;
     findData->search_column = 0;
     findData->result_iter = g_new(GtkTreeIter, 1);  // cấp phát cho iter
@@ -513,6 +521,9 @@ void historyCustomers(GtkWidget *widget, gpointer user_data)
     GtkWidget *time_label = gtk_label_new("Thời gian");
     GtkWidget *service_label = gtk_label_new("Dịch vụ");
     GtkWidget *cost_label = gtk_label_new("Giá");
+    gtk_widget_set_name(time_label, "title");
+    gtk_widget_set_name(service_label, "title");
+    gtk_widget_set_name(cost_label, "title");
 
     gtk_grid_attach(GTK_GRID(grid_history), time_label, 0, 0, 1, 1);
     gtk_grid_attach(GTK_GRID(grid_history), service_label, 1, 0, 1, 1);
@@ -540,6 +551,6 @@ void historyCustomers(GtkWidget *widget, gpointer user_data)
     g_signal_connect_swapped(back_button, "clicked", G_CALLBACK(gtk_widget_destroy), historyCustomers_window);
 
     // Giải phóng bộ nhớ cho các struct khi tắt cửa sổ con
-    g_signal_connect(historyCustomers_window, "destroy", G_CALLBACK(free_memory_when_main_window_destroy), findData);
+    g_signal_connect(historyCustomers_window, "destroy", G_CALLBACK(free_struct_and_iter_customer), findData);
     g_signal_connect(historyCustomers_window, "destroy", G_CALLBACK(free_memory_when_main_window_destroy), history_data);
 }

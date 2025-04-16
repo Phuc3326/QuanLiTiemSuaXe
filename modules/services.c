@@ -223,7 +223,7 @@ void deleteServices(GtkWidget *widget, gpointer user_data)
     g_signal_connect_swapped(cancel_button, "clicked", G_CALLBACK(gtk_widget_destroy), deleteServices_window);
 
     // Giải phóng FindIterOfSearch
-    g_signal_connect(deleteServices_window, "destroy", G_CALLBACK(free_memory_when_main_window_destroy), findData);
+    g_signal_connect(deleteServices_window, "destroy", G_CALLBACK(free_struct_and_iter_service), findData);
 }
 
 void editServices(GtkWidget *widget, gpointer user_data)
@@ -305,5 +305,5 @@ void editServices(GtkWidget *widget, gpointer user_data)
     g_signal_connect_swapped(cancel_button, "clicked", G_CALLBACK(gtk_widget_destroy), editServices_window);
 
     // Giải phóng FindIterOfSearch
-    g_signal_connect(editServices_window, "destroy", G_CALLBACK(free_memory_when_main_window_destroy), findData);
+    g_signal_connect(editServices_window, "destroy", G_CALLBACK(free_struct_and_iter_service), findData);
 }
