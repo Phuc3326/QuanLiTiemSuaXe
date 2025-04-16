@@ -12,6 +12,7 @@
 #include "../ui/utils/get_last_iter.h"
 #include "../ui/utils/update_txt_bil.h"
 #include "../ui/utils/search_in_model.h"
+#include "../ui/utils/freeMemory.h"
 
 /**
  * Thêm dữ liệu vào list store
@@ -188,6 +189,7 @@ void exportBill(GtkWidget *widget, gpointer user_data)
     FindIterOfSearch_billing *findData = g_new0(FindIterOfSearch_billing, 1);
     findData->list_store = data->store;
     findData->customerList = data->customerList;
+    findData->serviceList = data->serviceList;
     findData->search_column = 0;
     findData->result_iter = g_new(GtkTreeIter, 1);  // cấp phát cho iter
     findData->grid = grid;
@@ -212,6 +214,8 @@ void exportBill(GtkWidget *widget, gpointer user_data)
     gtk_grid_attach(GTK_GRID(grid_pay), time, 0, 4, 1, 1);
 
     // Xử lí lấy thông tin từ Liststore để hiển thị
+    findData->grid_pay = grid_pay;
+    g_signal_connect(entry, "changed", G_CALLBACK(search_billingList_for_service), findData);
 
     // Thiết lập box_export
     gtk_widget_set_halign(box_export, GTK_ALIGN_CENTER); // Căn giữa theo chiều ngang
@@ -225,4 +229,7 @@ void exportBill(GtkWidget *widget, gpointer user_data)
     g_signal_connect_swapped(back_button, "clicked", G_CALLBACK(gtk_widget_destroy), exportBill_window);
 
     // Handle "EXPORT BILL" button
+
+    // Giải phóng struct
+    g_signal_connect(exportBill_window, "destroy", G_CALLBACK(free_struct_and_iter_billing), findData);
 }

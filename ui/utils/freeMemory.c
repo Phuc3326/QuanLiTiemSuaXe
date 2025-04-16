@@ -32,3 +32,14 @@ void free_struct_and_iter_service(GtkWidget *window, gpointer user_data)
         g_free(findData);
     }
 }
+
+void free_struct_and_iter_billing(GtkWidget *window, gpointer user_data)
+{
+    FindIterOfSearch_billing *findData = (FindIterOfSearch_billing *)user_data;
+    if (findData) {
+        if (findData->result_iter) {
+            g_free(findData->result_iter);
+        }
+        g_free(findData);
+    }
+}

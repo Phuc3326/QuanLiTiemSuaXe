@@ -27,14 +27,21 @@ typedef struct
     gint search_column;
     GtkTreeIter *result_iter;
     GtkWidget *grid;
+    GtkWidget *grid_pay;
     // Các label cần cho việc hiện thông tin trong các cửa sổ con
     GtkWidget *id_label;       
     GtkWidget *name_label;
     GtkWidget *numberphone_label;
     GtkWidget *numberplate_label;
     GtkWidget *cartype_label;
-    // Liststore của customer
+    GtkWidget *id_bil_label;
+    GtkWidget *id_ser_label;
+    GtkWidget *ser_name_label;
+    GtkWidget *cost_label;
+    GtkWidget *time_label; 
+    // Liststore
     GtkListStore *customerList;
+    GtkListStore *serviceList;
 } FindIterOfSearch_billing;
 
 void addBill(GtkWidget *widget, gpointer user_data);
