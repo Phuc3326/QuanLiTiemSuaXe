@@ -103,7 +103,7 @@ static gboolean filter_visible_func(GtkTreeModel *model, GtkTreeIter *iter, gpoi
 {
     GtkTreeModelFilter *filter_model = GTK_TREE_MODEL_FILTER(data);
     const gchar *search_text = g_object_get_data(G_OBJECT(filter_model), "search-text");
-    gchar *billing_id;
+    gchar *time;
     gboolean visible = TRUE;
 
     // If search text is empty, show all rows
@@ -112,14 +112,14 @@ static gboolean filter_visible_func(GtkTreeModel *model, GtkTreeIter *iter, gpoi
         return TRUE;
     }
 
-    // Get the billing id from column 1
-    gtk_tree_model_get(model, iter, 0, &billing_id, -1);
+    // Get the time from column 2
+    gtk_tree_model_get(model, iter, 1, &time, -1);
 
-    // Check if the plate number contains the search text
-    if (billing_id != NULL)
+    // Check if the time contains the search text
+    if (time != NULL)
     {
-        visible = (g_strstr_len(billing_id, -1, search_text) != NULL);
-        g_free(billing_id);
+        visible = (g_strstr_len(time, -1, search_text) != NULL);
+        g_free(time);
     }
 
     return visible;
@@ -139,7 +139,7 @@ GtkWidget *createPaymentPage(GtkWidget *notebook, GtkWidget *window, gpointer d)
 
     GtkWidget *searchBoxForPageHoaDon = createBox(menuBoxForPageHoaDon, GTK_ORIENTATION_HORIZONTAL, 10);
     GtkWidget *searchBarForPageHoaDon = createSearch(searchBoxForPageHoaDon);
-    gtk_entry_set_placeholder_text(GTK_ENTRY(searchBarForPageHoaDon), "Tìm kiếm theo mã khách hàng");
+    gtk_entry_set_placeholder_text(GTK_ENTRY(searchBarForPageHoaDon), "Tìm kiếm theo thời gian");
     gtk_widget_set_size_request(searchBarForPageHoaDon, 300, -1);
 
     GtkWidget *buttonTaoHoaDon = createButton(menuBoxForPageHoaDon, "Tạo hóa đơn");
