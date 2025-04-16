@@ -404,7 +404,7 @@ void display_payment_info(FindIterOfSearch_billing *findData, gchar *id_bil, gch
     g_free(cost);
     g_free(time);
 
-    gtk_widget_show_all(data->grid);
+    gtk_widget_show_all(data->grid_pay);
 }
 
 void search_serviceList(gpointer findData, gchar *id_ser, gchar *id_bil, gchar *time)
