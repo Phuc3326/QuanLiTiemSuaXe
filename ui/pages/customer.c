@@ -149,7 +149,14 @@ GtkWidget *createCustomerPage(GtkWidget *notebook, GtkWidget *window, gpointer d
     GtkWidget *buttonLichSuKhachHang = createButton(menuBoxForPageKhachHang, "Lịch sử khách hàng");
 
     // Hiển thị danh sách khách hàng
-    GtkWidget *listViewForPageKhachHang = createTreeView(page);
+    GtkWidget *scrolled_window = gtk_scrolled_window_new(NULL, NULL);
+
+    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window),
+                                GTK_POLICY_NEVER,
+                                GTK_POLICY_ALWAYS);
+    gtk_container_add(GTK_CONTAINER(page), scrolled_window);
+    
+    GtkWidget *listViewForPageKhachHang = createTreeView(scrolled_window);
     const gchar *columnNames[] = {"Mã KH", "Tên KH", "SĐT", "Biển số", "Loại xe", NULL};
     createColumns(listViewForPageKhachHang, columnNames, 5);
 

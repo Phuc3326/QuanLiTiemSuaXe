@@ -156,7 +156,15 @@ GtkWidget *createStatisticalPage(GtkWidget *notebook, GtkWidget *window, gpointe
     modelCentral *data = (modelCentral *)user_data;
     populate_stats_tree_store(store, data->billingList, data->serviceList);
 
-    GtkWidget *statsTreeView = createTreeView(page);
+    GtkWidget *scrolled_window = gtk_scrolled_window_new(NULL, NULL);
+
+    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window),
+                                GTK_POLICY_NEVER,
+                                GTK_POLICY_ALWAYS);
+    gtk_container_add(GTK_CONTAINER(page), scrolled_window);
+
+    GtkWidget *statsTreeView = createTreeView(scrolled_window);
+
     const gchar *columnNames[] = {"Thời gian", "Số xe sửa chữa", "Doanh thu (VND)"};
     createColumns(statsTreeView, columnNames, 3);
     gtk_tree_view_set_model(GTK_TREE_VIEW(statsTreeView), GTK_TREE_MODEL(store));

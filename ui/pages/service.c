@@ -146,7 +146,15 @@ GtkWidget *createServicePage(GtkWidget *notebook, GtkWidget *window, gpointer us
     GtkWidget *buttonSuaDichVu = createButton(menuBoxForPageDichVu, "Sửa dịch vụ");
 
     // Hiển thị danh sách khách hàng
-    GtkWidget *listViewForPageDichVu = createTreeView(page);
+
+    GtkWidget *scrolled_window = gtk_scrolled_window_new(NULL, NULL);
+
+    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window),
+                                GTK_POLICY_NEVER,
+                                GTK_POLICY_ALWAYS);
+    gtk_container_add(GTK_CONTAINER(page), scrolled_window);
+
+    GtkWidget *listViewForPageDichVu = createTreeView(scrolled_window);
     const gchar *columnNames[] = {"Mã DV", "Tên dịch vụ", "Giá"};
     createColumns(listViewForPageDichVu, columnNames, 3);
 
