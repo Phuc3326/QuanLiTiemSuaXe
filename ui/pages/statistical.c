@@ -55,6 +55,9 @@ void populate_stats_tree_store(GtkTreeStore *store, GtkListStore *billingList, G
                            3, &service_id, // mã dịch vụ
                            -1);
 
+                        // Xóa khoảng trắng thừa trong service_id
+                        g_strstrip(service_id);
+
         gint day, month, year;
         sscanf(date_str, "%d-%d-%d", &day, &month, &year);
 
