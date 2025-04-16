@@ -21,6 +21,22 @@ typedef struct {
     GtkListStore *store;
 } AddBillData;
 
+typedef struct 
+{
+    GtkListStore *list_store;
+    gint search_column;
+    GtkTreeIter *result_iter;
+    GtkWidget *grid;
+    // Các label cần cho việc hiện thông tin trong các cửa sổ con
+    GtkWidget *id_label;       
+    GtkWidget *name_label;
+    GtkWidget *numberphone_label;
+    GtkWidget *numberplate_label;
+    GtkWidget *cartype_label;
+    // Liststore của customer
+    GtkListStore *customerList;
+} FindIterOfSearch_billing;
+
 void addBill(GtkWidget *widget, gpointer user_data);
 static void addData(GtkListStore *store, const char *filename, ...);
 void exportBill(GtkWidget *widget, gpointer user_data);

@@ -43,6 +43,14 @@ typedef struct
     GtkWidget *cartype_label;
 } FindIterOfSearch;
 
+typedef struct {
+    GtkListStore *billingList;
+    GtkListStore *serviceList;
+    GtkGrid *grid_history;
+    GtkWidget *entry;
+} HistoryData;
+
+
 void addCustomers(GtkWidget *widget, gpointer user_data);
 static void addData(GtkListStore *store, const char *filename, ...);
 void deleteCustomers(GtkWidget *widget, gpointer user_data);

@@ -14,13 +14,6 @@
 #include "../ui/utils/freeMemory.h"
 #include "../ui/utils/update_txt.h"
 
-typedef struct {
-    GtkListStore *billingList;
-    GtkListStore *serviceList;
-    GtkGrid *grid_history;
-    GtkWidget *entry;
-} HistoryData;
-
 void clear_grid_history(GtkGrid *grid_history) {
     GList *children = gtk_container_get_children(GTK_CONTAINER(grid_history));
     GList *l;
