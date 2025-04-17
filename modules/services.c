@@ -49,9 +49,6 @@ static void on_save_clicked(GtkButton *button, gpointer add_data) {
         2, cost,
         -1);
 
-    // Giải phóng AddServiceData
-    g_free(data);
-
     // Đóng cửa sổ sau khi lưu dữ liệu
     GtkWidget *window = gtk_widget_get_toplevel(GTK_WIDGET(button));
     gtk_widget_destroy(window);
@@ -160,6 +157,8 @@ void addServices(GtkWidget *widget, gpointer user_data) {
     g_signal_connect(save_button, "clicked", G_CALLBACK(on_save_clicked), add_data);
 
     g_signal_connect_swapped(cancel_button, "clicked", G_CALLBACK(gtk_widget_destroy), addServices_window);
+
+    g_signal_connect(addServices_window, "destroy", G_CALLBACK(free_memory_when_main_window_destroy), add_data);
 }
 
 void deleteServices(GtkWidget *widget, gpointer user_data)
@@ -277,10 +276,10 @@ void editServices(GtkWidget *widget, gpointer user_data)
     gtk_widget_set_halign(cost_entry, GTK_ALIGN_FILL);
 
     // Xử lí lấy thông tin từ Liststore để hiển thị
-    FindIterOfSearch_service *findData = g_new(FindIterOfSearch_service, 1);
+    FindIterOfSearch_service *findData = g_new0(FindIterOfSearch_service, 1);
     findData->list_store = data->store;
     findData->search_column = 0;
-    findData->result_iter = g_new(GtkTreeIter, 1);  // cấp phát cho iter
+    findData->result_iter = g_new0(GtkTreeIter, 1);  // cấp phát cho iter
     findData->grid = grid;
     findData->id_entry = id_entry;
     findData->name_entry = name_entry;

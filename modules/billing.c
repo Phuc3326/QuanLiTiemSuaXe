@@ -67,9 +67,6 @@ static void on_create_clicked(GtkButton *button, gpointer add_data) {
         3, id_ser,
         -1);
 
-    // Giải phóng AddBillData
-    g_free(data);
-
     // Đóng cửa sổ sau khi lưu dữ liệu
     GtkWidget *window = gtk_widget_get_toplevel(GTK_WIDGET(button));
     gtk_widget_destroy(window);
@@ -136,6 +133,8 @@ void addBill(GtkWidget *widget, gpointer user_data) {
     g_signal_connect(create_button, "clicked", G_CALLBACK(on_create_clicked), add_data);
 
     g_signal_connect_swapped(cancel_button, "clicked", G_CALLBACK(gtk_widget_destroy), addBill_window);
+
+    g_signal_connect(addBill_window, "destroy", G_CALLBACK(free_memory_when_main_window_destroy), add_data);
 }
 
 void exportBill(GtkWidget *widget, gpointer user_data)
@@ -191,7 +190,7 @@ void exportBill(GtkWidget *widget, gpointer user_data)
     findData->customerList = data->customerList;
     findData->serviceList = data->serviceList;
     findData->search_column = 0;
-    findData->result_iter = g_new(GtkTreeIter, 1);  // cấp phát cho iter
+    findData->result_iter = g_new0(GtkTreeIter, 1);  // cấp phát cho iter
     findData->grid = grid;
     g_signal_connect(entry, "changed", G_CALLBACK(search_billingList_for_customer), findData);
 
