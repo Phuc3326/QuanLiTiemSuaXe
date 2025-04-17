@@ -81,7 +81,7 @@ void search_in_liststore_customer(GtkEntry *entry_search, gpointer findData)
 }
 
 void display_customer_info_edit(FindIterOfSearch *findData,
-    GtkEntry *id_entry,
+    // GtkEntry *id_entry,
     GtkEntry *name_entry,
     GtkEntry *numberphone_entry,
     GtkEntry *numberplate_entry,
@@ -91,22 +91,22 @@ void display_customer_info_edit(FindIterOfSearch *findData,
     GtkTreeModel *model = GTK_TREE_MODEL(data->list_store);
     GtkTreeIter *iter = data->result_iter;
 
-    gchar *id_found, *name_found, *numberphone_found, *numberplate_found, *cartype_found;
+    gchar *name_found, *numberphone_found, *numberplate_found, *cartype_found;
     gtk_tree_model_get(model, iter,
-    0, &id_found,
+    // 0, &id_found,
     1, &name_found,
     2, &numberphone_found,
     3, &numberplate_found,
     4, &cartype_found,
     -1);
 
-    gtk_entry_set_text(id_entry, id_found);
+    // gtk_entry_set_text(id_entry, id_found);
     gtk_entry_set_text(name_entry, name_found);
     gtk_entry_set_text(numberphone_entry, numberphone_found);
     gtk_entry_set_text(numberplate_entry, numberplate_found);
     gtk_entry_set_text(cartype_entry, cartype_found);
 
-    g_free(id_found);
+    // g_free(id_found);
     g_free(name_found);
     g_free(numberphone_found);
     g_free(numberplate_found);
@@ -134,7 +134,7 @@ void search_in_liststore_customer_edit(GtkEntry *entry_search, gpointer user_dat
 
                 display_customer_info_edit(
                     data,
-                    GTK_ENTRY(data->id_entry),
+                    // GTK_ENTRY(data->id_entry),
                     GTK_ENTRY(data->name_entry),
                     GTK_ENTRY(data->numberphone_entry),
                     GTK_ENTRY(data->numberplate_entry),

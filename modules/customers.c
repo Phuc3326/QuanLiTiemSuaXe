@@ -159,9 +159,6 @@ static void on_save_clicked(GtkButton *button, gpointer add_data) {
         4, type,
         -1);
 
-    // Giải phóng AddCustomerData
-    g_free(data);
-
     // Đóng cửa sổ sau khi lưu dữ liệu
     GtkWidget *window = gtk_widget_get_toplevel(GTK_WIDGET(button));
     gtk_widget_destroy(window);
@@ -189,7 +186,7 @@ static void on_edit_button_clicked(GtkButton *button, gpointer user_data) {
     FindIterOfSearch *data = (FindIterOfSearch *)user_data;
 
     // Lấy dữ liệu mới từ GtkEntry
-    const gchar *new_id = gtk_entry_get_text(GTK_ENTRY(data->id_entry));
+    // const gchar *new_id = gtk_entry_get_text(GTK_ENTRY(data->id_entry));
     const gchar *new_name = gtk_entry_get_text(GTK_ENTRY(data->name_entry));
     const gchar *new_phone = gtk_entry_get_text(GTK_ENTRY(data->numberphone_entry));
     const gchar *new_plate = gtk_entry_get_text(GTK_ENTRY(data->numberplate_entry));
@@ -198,7 +195,7 @@ static void on_edit_button_clicked(GtkButton *button, gpointer user_data) {
     // Cập nhật lại dữ liệu trong GtkListStore
     if (data->result_iter != NULL) {
         gtk_list_store_set(data->list_store, data->result_iter,
-            0, new_id,
+            // 0, new_id,
             1, new_name,
             2, new_phone,
             3, new_plate,
@@ -283,6 +280,8 @@ void addCustomers(GtkWidget *widget, gpointer user_data) {
     g_signal_connect(save_button, "clicked", G_CALLBACK(on_save_clicked), add_data);
 
     g_signal_connect_swapped(cancel_button, "clicked", G_CALLBACK(gtk_widget_destroy), addCustomers_window);
+
+    g_signal_connect(addCustomers_window, "destroy", G_CALLBACK(free_memory_when_main_window_destroy), add_data);
 }
 
 void deleteCustomers(GtkWidget *widget, gpointer user_data)
@@ -325,10 +324,10 @@ void deleteCustomers(GtkWidget *widget, gpointer user_data)
     gtk_grid_attach(GTK_GRID(grid), cartype_label, 0, 4, 1, 1);
 
     // Lấy thông tin từ Liststore để hiển thị
-    FindIterOfSearch *findData = g_new(FindIterOfSearch, 1);
+    FindIterOfSearch *findData = g_new0(FindIterOfSearch, 1);
     findData->list_store = data->store;
     findData->search_column = 0;
-    findData->result_iter = g_new(GtkTreeIter, 1);  // cấp phát cho iter
+    findData->result_iter = g_new0(GtkTreeIter, 1);  // cấp phát cho iter
     findData->grid = grid;
     g_signal_connect(entry, "changed", G_CALLBACK(search_in_liststore_customer), findData);
 
@@ -380,31 +379,31 @@ void editCustomers(GtkWidget *widget, gpointer user_data)
     // Thiết lập cho box_information
     GtkWidget *grid = createGrid(box_information);
 
-    GtkWidget *id_label = gtk_label_new("Mã KH:");
+    // GtkWidget *id_label = gtk_label_new("Mã KH:");
     GtkWidget *name_label = gtk_label_new("Tên KH:");
     GtkWidget *numberphone_label = gtk_label_new("SĐT:");
     GtkWidget *numberplate_label = gtk_label_new("Biển số:");
     GtkWidget *cartype_label = gtk_label_new("Loại xe:");
 
-    gtk_grid_attach(GTK_GRID(grid), id_label, 0, 0, 1, 1);
+    // gtk_grid_attach(GTK_GRID(grid), id_label, 0, 0, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), name_label, 0, 1, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), numberphone_label, 0, 2, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), numberplate_label, 0, 3, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), cartype_label, 0, 4, 1, 1);
 
-    GtkWidget *id_entry =  gtk_search_entry_new();
+    // GtkWidget *id_entry =  gtk_search_entry_new();
     GtkWidget *name_entry =  gtk_search_entry_new();
     GtkWidget *numberphone_entry =  gtk_search_entry_new();
     GtkWidget *numberplate_entry =  gtk_search_entry_new();
     GtkWidget *cartype_entry =  gtk_search_entry_new();
 
-    gtk_grid_attach(GTK_GRID(grid), id_entry, 1, 0, 2, 1);
+    // gtk_grid_attach(GTK_GRID(grid), id_entry, 1, 0, 2, 1);
     gtk_grid_attach(GTK_GRID(grid), name_entry, 1, 1, 2, 1);
     gtk_grid_attach(GTK_GRID(grid), numberphone_entry, 1, 2, 2, 1);
     gtk_grid_attach(GTK_GRID(grid), numberplate_entry, 1, 3, 2, 1);
     gtk_grid_attach(GTK_GRID(grid), cartype_entry, 1, 4, 2, 1);
-    gtk_widget_set_hexpand(id_entry, TRUE);
-    gtk_widget_set_halign(id_entry, GTK_ALIGN_FILL);
+    // gtk_widget_set_hexpand(id_entry, TRUE);
+    // gtk_widget_set_halign(id_entry, GTK_ALIGN_FILL);
     gtk_widget_set_hexpand(name_entry, TRUE);
     gtk_widget_set_halign(name_entry, GTK_ALIGN_FILL);
     gtk_widget_set_hexpand(numberphone_entry, TRUE);
@@ -415,12 +414,12 @@ void editCustomers(GtkWidget *widget, gpointer user_data)
     gtk_widget_set_halign(cartype_entry, GTK_ALIGN_FILL);
 
     // Xử lí lấy thông tin từ Liststore để hiển thị
-    FindIterOfSearch *findData = g_new(FindIterOfSearch, 1);
+    FindIterOfSearch *findData = g_new0(FindIterOfSearch, 1);
     findData->list_store = data->store;
     findData->search_column = 0;
-    findData->result_iter = g_new(GtkTreeIter, 1);  // cấp phát cho iter
+    findData->result_iter = g_new0(GtkTreeIter, 1);  // cấp phát cho iter
     findData->grid = grid;
-    findData->id_entry = id_entry;
+    // findData->id_entry = id_entry;
     findData->name_entry = name_entry;
     findData->numberphone_entry = numberphone_entry;
     findData->numberplate_entry = numberplate_entry;
@@ -497,7 +496,7 @@ void historyCustomers(GtkWidget *widget, gpointer user_data)
     FindIterOfSearch *findData = g_new0(FindIterOfSearch, 1);
     findData->list_store = data->store;
     findData->search_column = 0;
-    findData->result_iter = g_new(GtkTreeIter, 1);  // cấp phát cho iter
+    findData->result_iter = g_new0(GtkTreeIter, 1);  // cấp phát cho iter
     findData->grid = grid;
     g_signal_connect(entry, "changed", G_CALLBACK(search_in_liststore_customer), findData);
 
